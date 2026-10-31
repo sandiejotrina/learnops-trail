@@ -2,115 +2,150 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#04040F">
+<meta name="color-scheme" content="dark">
 <title>The LearnOps Trail</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@500;700&family=VT323&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Pixelify+Sans:wght@500;700&family=VT323&display=swap" rel="stylesheet">
 <style>
+/* Retro palette pulled from the Session 513 deck: navy 0B0B24, lime CEFF59, purple 5F51CA, magenta FA1DF8 */
 :root{
-  --bg:#F3EAD3; --panel:#FBF5E6; --ink:#2A1838; --muted:#6B5A78; --gold:#8A5E00; --sage:#2F6B45; --red:#B3361B;
-  --line:#CDBF9F; --sky1:#CFE3E8; --sky2:#F3D9B1; --hill:#7FB685; --hill2:#5E9A68; --trail:#B98A3E; --river:#2F86B5;
-  --wagon:#2A1838; --cover:#FFFFFF; --field:#FFFFFF; --shadow:#2A1838;
-}
-@media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]){
-    --bg:#1B1026; --panel:#261735; --ink:#F3EAD3; --muted:#B9A9C9; --gold:#F2C14E; --sage:#8FD19E; --red:#FF7A5C;
-    --line:#4A3560; --sky1:#2B1B4A; --sky2:#6A3472; --hill:#3E6B4F; --hill2:#2C4F3B; --trail:#D9B26A; --river:#3FA7D6;
-    --wagon:#F3EAD3; --cover:#F2C14E; --field:#1B1026; --shadow:#0D0714;
-  }
-}
-:root[data-theme="dark"]{
-  --bg:#1B1026; --panel:#261735; --ink:#F3EAD3; --muted:#B9A9C9; --gold:#F2C14E; --sage:#8FD19E; --red:#FF7A5C;
-  --line:#4A3560; --sky1:#2B1B4A; --sky2:#6A3472; --hill:#3E6B4F; --hill2:#2C4F3B; --trail:#D9B26A; --river:#3FA7D6;
-  --wagon:#F3EAD3; --cover:#F2C14E; --field:#1B1026; --shadow:#0D0714;
+  color-scheme:dark;
+  --bg:#04040F; --panel:#0B0B24; --panel2:#14143A; --ink:#EEEDFB; --muted:#B3B0DC; --soft:#9D93F0;
+  --gold:#CEFF59; --sage:#CEFF59; --red:#FA1DF8; --purple:#5F51CA;
+  --line:#3A3A52; --field:#04040F; --shadow:#5F51CA;
+  --sky1:#0B0B24; --sky2:#2A1F5C; --hill:#2A2466; --hill2:#1B1845; --trail:#CEFF59; --river:#7B6FF0;
+  --wagon:#EEEDFB; --cover:#EEEDFB;
 }
 *{box-sizing:border-box}
-html{-webkit-text-size-adjust:100%}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:"VT323","Courier New",ui-monospace,monospace;font-size:1.4rem;line-height:1.22}
-.wrap{max-width:640px;margin:0 auto;padding:12px 14px 40px}
-h1,h2,.disp{font-family:"Pixelify Sans","Trebuchet MS",Verdana,sans-serif;font-weight:700;line-height:1.08;margin:0}
-h1{font-size:2.3rem;letter-spacing:.01em}
-h2{font-size:1.45rem;margin:0 0 8px}
+html{-webkit-text-size-adjust:100%;background:var(--bg)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:1.125rem;line-height:1.5;font-variant-ligatures:none;font-feature-settings:"liga" 0,"clig" 0;
+  background-image:radial-gradient(circle at 50% -10%,#1A1550 0,transparent 60%);background-attachment:fixed}
+.wrap{max-width:640px;margin:0 auto;padding:12px max(16px,env(safe-area-inset-right)) calc(40px + env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left))}
+h1,h2,.disp{font-family:"Pixelify Sans","Trebuchet MS",Verdana,sans-serif;font-weight:700;line-height:1.1;margin:0}
+h1{font-size:2.3rem;color:var(--gold);text-transform:uppercase;letter-spacing:.03em;text-shadow:3px 3px 0 var(--purple)}
+h2{font-size:1.45rem;margin:0 0 10px;color:var(--ink)}
 p{margin:0 0 12px}
 .muted{color:var(--muted)}
 .gold{color:var(--gold)} .sage{color:var(--sage)} .red{color:var(--red)}
 
-/* HUD */
-.hud{display:flex;align-items:center;gap:10px;justify-content:space-between;border:2px solid var(--ink);background:var(--panel);padding:6px 10px;box-shadow:4px 4px 0 var(--shadow)}
+/* blinking cursor after the question that sits right above the choices */
+@keyframes blink{50%{opacity:0}}
+p:has(+ .choices)::after{content:"";display:inline-block;width:.55em;height:1.05em;margin-left:6px;vertical-align:-3px;background:var(--gold);animation:blink 1s steps(1) infinite}
+
+/* HUD: the status bar */
+.hud{position:sticky;top:max(8px,env(safe-area-inset-top));z-index:5;display:flex;align-items:center;gap:10px;justify-content:space-between;border:2px solid var(--purple);background:var(--panel);padding:7px 12px;box-shadow:4px 4px 0 #000;font-family:"Pixelify Sans",sans-serif;font-weight:500}
 .hud[hidden]{display:none}
-.hud .name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;flex:1}
-.hud .hrs{font-family:"Pixelify Sans",sans-serif;font-weight:700;white-space:nowrap}
+.hud .name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;flex:1;color:var(--soft);text-transform:uppercase;font-size:1rem;letter-spacing:.04em}
+.hud .hrs{font-weight:700;white-space:nowrap;color:var(--gold);font-size:1.2rem}
 .hud .hrs.neg{color:var(--red)}
 .stamps{display:flex;gap:4px}
-.stamps i{display:block;width:16px;height:16px;border:2px solid var(--ink)}
-.stamps i.on{background:var(--gold)}
+.stamps i{display:block;width:16px;height:16px;border:2px solid var(--soft)}
+.stamps i.on{background:var(--gold);border-color:var(--gold)}
+.stamps i.pop{animation:pop .6s steps(4)}
+@keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.8)}100%{transform:scale(1)}}
+.hud .hrs.bump{animation:pop .5s steps(3)}
 
-/* Scene */
-.scene{margin:12px 0 0;border:2px solid var(--ink);box-shadow:4px 4px 0 var(--shadow);background:var(--sky1);overflow:hidden}
+/* Scene: the travel screen */
+.scene{position:relative;margin:12px 0 0;border:2px solid var(--purple);box-shadow:4px 4px 0 #000;background:var(--sky1);overflow:hidden}
 .scene svg{display:block;width:100%;height:auto;shape-rendering:crispEdges}
+.scene::after{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(0,0,0,.22) 0 1px,transparent 1px 3px)}
 #wagon{transition:transform 1.4s steps(14)}
 #wagon.roll .bob{animation:bob .35s steps(2) infinite}
 @keyframes bob{50%{transform:translateY(-1px)}}
-@media (prefers-reduced-motion: reduce){#wagon{transition:none}#wagon.roll .bob{animation:none}}
+.twinkle{animation:blink 2.4s steps(1) infinite}
+.twinkle.b{animation-delay:1.2s}
 
 /* Panel */
-.panel{margin-top:12px;border:2px solid var(--ink);background:var(--panel);padding:16px 14px 18px;box-shadow:4px 4px 0 var(--shadow)}
-.where{font-family:"Pixelify Sans",sans-serif;font-weight:500;font-size:1rem;color:var(--muted);margin-bottom:4px}
-.choices{display:grid;gap:10px;margin-top:6px}
+.panel{margin-top:12px;border:2px solid var(--purple);background:var(--panel);padding:18px 16px 20px;box-shadow:4px 4px 0 #000;position:relative}
+.panel::before{content:"";position:absolute;inset:4px;border:1px solid var(--line);pointer-events:none}
+.where{font-family:"Pixelify Sans",sans-serif;font-weight:500;font-size:.95rem;color:var(--soft);margin-bottom:6px;text-transform:uppercase;letter-spacing:.08em}
+.choices{display:grid;gap:10px;margin-top:8px}
 button{font:inherit;color:inherit;cursor:pointer}
-.choice,.go{display:block;width:100%;text-align:left;background:var(--bg);border:2px solid var(--ink);padding:10px 12px;box-shadow:3px 3px 0 var(--shadow)}
-.choice b{color:var(--gold);margin-right:6px}
-.go{background:var(--ink);color:var(--bg);text-align:center;font-family:"Pixelify Sans",sans-serif;font-weight:700;font-size:1.15rem;margin-top:14px}
-.ghost{background:transparent;border:0;text-decoration:underline;color:var(--muted);padding:8px 0;margin-top:6px;font-size:1.15rem}
+.choice,.go{display:block;width:100%;min-height:52px;text-align:left;background:var(--panel2);border:2px solid var(--purple);padding:12px 14px;box-shadow:3px 3px 0 #000;transition:transform .08s,box-shadow .08s,border-color .08s;position:relative}
+.choice{display:flex;gap:10px;align-items:baseline;color:var(--ink)}
+.choice b{color:var(--gold);font-family:"Pixelify Sans",sans-serif;font-weight:700;flex:none;min-width:1.4em}
+.go{background:var(--gold);color:var(--panel);border-color:var(--gold);text-align:center;font-family:"Pixelify Sans",sans-serif;font-weight:700;font-size:1.2rem;margin-top:16px;text-transform:uppercase;letter-spacing:.04em}
+.ghost{background:transparent;border:0;text-decoration:underline;text-underline-offset:3px;color:var(--muted);padding:12px 0;min-height:44px;margin-top:4px;font-size:1rem}
+@media (hover:hover){
+  .choice:hover{border-color:var(--gold);transform:translate(-1px,-1px);box-shadow:5px 5px 0 #000}
+  .go:hover{transform:translate(-1px,-1px);box-shadow:5px 5px 0 var(--purple)}
+  .ghost:hover,.foot button:hover{color:var(--gold)}}
 .choice:active,.go:active{transform:translate(3px,3px);box-shadow:none}
+.choice:focus-visible{border-color:var(--gold)}
 button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
-.box{border:2px dashed var(--line);padding:10px 12px;margin:12px 0}
+.box{border:2px dashed var(--line);padding:12px 14px;margin:14px 0}
 .box p:last-child{margin-bottom:0}
-.tag{font-family:"Pixelify Sans",sans-serif;font-weight:700;font-size:1rem}
-.cost{font-family:"Pixelify Sans",sans-serif;font-weight:700;font-size:1.3rem}
+.tag{font-family:"Pixelify Sans",sans-serif;font-weight:700;font-size:1rem;text-transform:uppercase;letter-spacing:.04em}
+.cost{font-family:"Pixelify Sans",sans-serif;font-weight:700;font-size:1.4rem}
 
 /* Forms */
-label{display:block;margin:12px 0 4px}
-label small{display:block;color:var(--muted);font-size:1.1rem;line-height:1.1}
-input[type=text],textarea,select{width:100%;font:inherit;font-size:1.3rem;color:var(--ink);background:var(--field);border:2px solid var(--ink);padding:8px;border-radius:0;-webkit-appearance:none;appearance:none}
-textarea{min-height:64px;resize:vertical}
-select{background-image:linear-gradient(45deg,transparent 50%,var(--ink) 50%),linear-gradient(135deg,var(--ink) 50%,transparent 50%);background-position:calc(100% - 18px) 55%,calc(100% - 12px) 55%;background-size:6px 6px;background-repeat:no-repeat}
-.row{border-top:2px solid var(--line);margin-top:14px;padding-top:2px}
-.live{border:2px solid var(--ink);padding:8px 10px;margin-top:14px;background:var(--bg)}
+label{display:block;margin:16px 0 6px;font-weight:700}
+label small{display:block;color:var(--muted);font-size:.95rem;line-height:1.35;font-weight:400;margin-top:2px}
+input[type=text],textarea,select{width:100%;font:inherit;font-size:1.1rem;color:var(--ink);background:var(--field);border:2px solid var(--purple);padding:10px;border-radius:0;-webkit-appearance:none;appearance:none;caret-color:var(--gold)}
+input[type=text]:focus,textarea:focus,select:focus{border-color:var(--gold)}
+textarea{min-height:92px;resize:vertical}
+input::placeholder,textarea::placeholder{color:var(--muted);opacity:.8}
+select{background-image:linear-gradient(45deg,transparent 50%,var(--gold) 50%),linear-gradient(135deg,var(--gold) 50%,transparent 50%);background-position:calc(100% - 18px) 55%,calc(100% - 12px) 55%;background-size:6px 6px;background-repeat:no-repeat}
+select option{background:var(--panel);color:var(--ink)}
+.row{border-top:2px solid var(--line);margin-top:16px;padding-top:2px}
+.live{border:2px solid var(--line);border-left-width:8px;padding:10px 12px;margin-top:14px;background:var(--bg)}
 .live.ok{border-color:var(--sage)} .live.no{border-color:var(--red)}
 pre{font:inherit;white-space:pre-wrap;word-break:break-word;margin:0}
 .scale{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:6px}
-.scale button{border:2px solid var(--ink);background:var(--bg);padding:8px 0;font-family:"Pixelify Sans",sans-serif;font-weight:700}
-.scale button[aria-pressed=true]{background:var(--gold);color:var(--bg)}
-.timer{font-family:"Pixelify Sans",sans-serif;font-weight:700;font-size:3rem;text-align:center;color:var(--red);margin:4px 0}
+.scale button{border:2px solid var(--purple);background:var(--panel2);color:var(--ink);padding:10px 0;min-height:48px;font-size:1.2rem;font-family:"Pixelify Sans",sans-serif;font-weight:700}
+.scale button[aria-pressed=true]{background:var(--gold);border-color:var(--gold);color:var(--panel)}
+.timer{font-family:"Pixelify Sans",sans-serif;font-weight:700;font-size:3.4rem;text-align:center;color:var(--red);margin:4px 0;text-shadow:3px 3px 0 #000}
 .tomb{display:block;margin:4px auto 10px;width:150px;height:auto;shape-rendering:crispEdges}
-.foot{margin-top:18px;font-size:1.1rem;color:var(--muted);display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
-.foot button{background:none;border:0;padding:0;color:var(--muted);text-decoration:underline;font-size:1.1rem}
-.score{border:2px solid var(--ink);background:var(--bg);padding:12px;margin:14px 0;text-align:center}
-.score .big{font-family:"Pixelify Sans",sans-serif;font-weight:700;font-size:3.2rem;line-height:1;color:var(--gold)}
-.score table{width:100%;border-collapse:collapse;margin-top:10px;text-align:left}
-.score td{padding:3px 0;border-top:2px dotted var(--line)} .score td:last-child{text-align:right;font-family:"Pixelify Sans",sans-serif;font-weight:700}
+.foot{margin-top:20px;font-size:.9rem;color:var(--muted);display:flex;justify-content:space-between;align-items:center;gap:6px 16px;flex-wrap:wrap}
+.foot button{background:none;border:0;padding:10px 0;min-height:44px;color:var(--muted);text-decoration:underline;text-underline-offset:3px;font-size:.9rem}
+.score{border:2px solid var(--gold);background:var(--bg);padding:14px;margin:14px 0;text-align:center;box-shadow:4px 4px 0 var(--purple)}
+.score .big{font-family:"Pixelify Sans",sans-serif;font-weight:700;font-size:3.4rem;line-height:1;color:var(--gold);text-shadow:3px 3px 0 var(--purple)}
+.score table{width:100%;border-collapse:collapse;margin-top:12px;text-align:left}
+.score td{padding:5px 0;border-top:2px dotted var(--line)} .score td:last-child{text-align:right;font-family:"Pixelify Sans",sans-serif;font-weight:700;color:var(--gold)}
 .entry{display:grid;grid-template-columns:3.2rem 1fr 6.5rem;gap:6px;align-items:center;margin-top:6px}
-.entry span{font-family:"Pixelify Sans",sans-serif;font-weight:700}
+.entry span{font-family:"Pixelify Sans",sans-serif;font-weight:700;color:var(--soft)}
 .rank{display:grid;grid-template-columns:2.6rem 1fr auto;gap:8px;align-items:center;padding:8px 0;border-top:2px solid var(--line)}
 .rank .pos{font-family:"Pixelify Sans",sans-serif;font-weight:700;font-size:1.6rem}
 .rank .bar{height:10px;background:var(--gold);margin-top:4px}
 .rank .pts{font-family:"Pixelify Sans",sans-serif;font-weight:700;font-size:1.5rem}
 .rank.top .pos,.rank.top .pts{color:var(--gold)}
 body.present .wrap{max-width:900px} body.present .rank{font-size:1.9rem} body.present .rank .pts,body.present .rank .pos{font-size:2.4rem}
-.arena{position:relative;height:300px;overflow:hidden;border:2px solid var(--ink);background:var(--bg);touch-action:manipulation;margin-top:6px}
-.chip{position:absolute;left:0;white-space:nowrap;border:2px solid var(--ink);background:var(--panel);color:var(--ink);padding:7px 9px;font-size:1.2rem;box-shadow:2px 2px 0 var(--shadow);animation:fly 4.2s linear forwards}
-.chip.got{background:var(--gold);color:var(--bg);animation-play-state:paused}
+.arena{position:relative;height:300px;overflow:hidden;border:2px solid var(--purple);background:var(--bg);touch-action:manipulation;margin-top:6px;
+  background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:24px 24px;background-position:-1px -1px}
+.chip{position:absolute;left:0;white-space:nowrap;border:2px solid var(--soft);background:var(--panel2);color:var(--ink);padding:9px 11px;font-size:1rem;font-weight:700;box-shadow:2px 2px 0 #000;animation:fly 4.2s linear forwards}
+.chip.got{background:var(--gold);border-color:var(--gold);color:var(--panel);animation-play-state:paused}
 @keyframes fly{from{transform:translateX(-100%)}to{transform:translateX(660px)}}
-@media (prefers-reduced-motion: reduce){.chip{animation:none}}
 .lock{display:block;margin:0 auto 10px;width:84px;height:auto;shape-rendering:crispEdges}
-.how li{margin:0 0 10px}
+.how li{margin:0 0 10px;padding-left:4px}
 .how ol{padding-left:1.4em;margin:0 0 12px}
-.trailev{border:2px solid var(--line);border-left:8px solid var(--gold);padding:8px 10px;margin:0 0 14px;background:var(--bg)}
+.how li::marker{color:var(--gold);font-family:"Pixelify Sans",sans-serif;font-weight:700}
+.trailev{border:2px solid var(--line);border-left:8px solid var(--soft);padding:10px 12px;margin:0 0 14px;background:var(--bg)}
 .trailev.bad{border-left-color:var(--red)} .trailev.good{border-left-color:var(--sage)}
 .trailev p{margin:0}
 .grave{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;align-items:baseline;padding:6px 0;border-top:2px dotted var(--line)}
-.kit{max-height:50vh;overflow:auto;border:2px solid var(--ink);background:var(--field);padding:10px}
+.kit{max-height:50vh;overflow:auto;border:2px solid var(--purple);background:var(--bg);padding:12px;font-family:"VT323","Courier New",ui-monospace,monospace;font-size:1.25rem;line-height:1.25;color:var(--gold)}
+/* Numbers use VT323: in Pixelify Sans a 2 reads like 8 and a 5 like S, risky on a projector */
+.num,.where,.tag,.cost,.timer,.disp,.hud .hrs,.score .big,.score td:last-child,.rank .pos,.rank .pts,.entry span,.scale button,.choice b,#board h2{font-family:"VT323","Courier New",ui-monospace,monospace;font-weight:400}
+.where{font-size:1.3rem;letter-spacing:.06em;line-height:1.1}
+.tag{font-size:1.3rem;letter-spacing:.03em}
+.cost{font-size:1.9rem}
+.timer{font-size:4.6rem;line-height:1}
+.disp{font-size:1.7rem !important}
+.hud .hrs{font-size:1.6rem}
+.score .big{font-size:4.6rem}
+.score td:last-child{font-size:1.5rem}
+.rank .pos{font-size:2.1rem} .rank .pts{font-size:2rem}
+body.present .rank .pts,body.present .rank .pos{font-size:3.2rem}
+.entry span{font-size:1.4rem}
+.scale button{font-size:1.6rem}
+.choice b{font-size:1.45rem;line-height:1}
+#board h2{font-size:2.2rem}
+.how li::marker{font-family:"VT323",monospace;font-weight:400;font-size:1.3rem}
+@media (prefers-reduced-motion: reduce){
+  #wagon{transition:none}#wagon.roll .bob,.chip,.twinkle,.stamps i.pop,.hud .hrs.bump,p:has(+ .choices)::after{animation:none}}
 </style>
 </head>
 <body>
@@ -123,32 +158,36 @@ body.present .wrap{max-width:900px} body.present .rank{font-size:1.9rem} body.pr
 
   <figure class="scene" aria-hidden="true">
     <svg viewBox="0 0 320 110" xmlns="http://www.w3.org/2000/svg">
-      <defs><linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--sky1)"/><stop offset="1" stop-color="var(--sky2)"/></linearGradient></defs>
+      <defs><linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0B0B24"/><stop offset="1" stop-color="#2A1F5C"/></linearGradient></defs>
       <rect width="320" height="110" fill="url(#sky)"/>
-      <rect x="262" y="14" width="12" height="12" fill="var(--gold)"/>
-      <polygon points="0,70 40,48 80,66 130,40 180,68 230,50 280,66 320,52 320,110 0,110" fill="var(--hill2)"/>
-      <polygon points="0,84 60,70 120,82 190,72 250,84 320,74 320,110 0,110" fill="var(--hill)"/>
+      <!-- stars and moon -->
+      <g fill="#EEEDFB"><rect x="20" y="10" width="2" height="2"/><rect x="58" y="22" width="2" height="2" class="twinkle"/><rect x="96" y="8" width="2" height="2"/><rect x="140" y="18" width="2" height="2" class="twinkle b"/><rect x="186" y="6" width="2" height="2"/><rect x="214" y="26" width="2" height="2" class="twinkle"/><rect x="300" y="12" width="2" height="2" class="twinkle b"/></g>
+      <g fill="#CEFF59"><rect x="120" y="30" width="2" height="2" class="twinkle b"/><rect x="236" y="14" width="2" height="2"/></g>
+      <rect x="262" y="12" width="14" height="14" fill="#EEEDFB"/><rect x="268" y="12" width="8" height="8" fill="#0B0B24"/>
+      <polygon points="0,70 40,48 80,66 130,40 180,68 230,50 280,66 320,52 320,110 0,110" fill="#2B2670"/>
+      <polygon points="0,84 60,70 120,82 190,72 250,84 320,74 320,110 0,110" fill="#3D3596"/>
       <!-- river -->
-      <polygon points="226,72 240,72 252,110 232,110" fill="var(--river)"/>
+      <polygon points="226,72 240,72 252,110 232,110" fill="#7B6FF0"/>
+      <rect x="234" y="86" width="4" height="2" fill="#EEEDFB"/><rect x="240" y="98" width="4" height="2" fill="#EEEDFB"/>
       <!-- trail -->
-      <g fill="var(--trail)"><rect x="8" y="98" width="8" height="3"/><rect x="24" y="98" width="8" height="3"/><rect x="40" y="98" width="8" height="3"/><rect x="56" y="98" width="8" height="3"/><rect x="72" y="98" width="8" height="3"/><rect x="88" y="98" width="8" height="3"/><rect x="104" y="98" width="8" height="3"/><rect x="120" y="98" width="8" height="3"/><rect x="136" y="98" width="8" height="3"/><rect x="152" y="98" width="8" height="3"/><rect x="168" y="98" width="8" height="3"/><rect x="184" y="98" width="8" height="3"/><rect x="200" y="98" width="8" height="3"/><rect x="216" y="98" width="8" height="3"/><rect x="256" y="98" width="8" height="3"/><rect x="272" y="98" width="8" height="3"/><rect x="288" y="98" width="8" height="3"/></g>
+      <g fill="#CEFF59"><rect x="8" y="98" width="8" height="3"/><rect x="24" y="98" width="8" height="3"/><rect x="40" y="98" width="8" height="3"/><rect x="56" y="98" width="8" height="3"/><rect x="72" y="98" width="8" height="3"/><rect x="88" y="98" width="8" height="3"/><rect x="104" y="98" width="8" height="3"/><rect x="120" y="98" width="8" height="3"/><rect x="136" y="98" width="8" height="3"/><rect x="152" y="98" width="8" height="3"/><rect x="168" y="98" width="8" height="3"/><rect x="184" y="98" width="8" height="3"/><rect x="200" y="98" width="8" height="3"/><rect x="216" y="98" width="8" height="3"/><rect x="256" y="98" width="8" height="3"/><rect x="272" y="98" width="8" height="3"/><rect x="288" y="98" width="8" height="3"/></g>
       <!-- town -->
-      <g fill="var(--wagon)"><rect x="14" y="78" width="14" height="14"/><polygon points="12,78 21,70 30,78"/><rect x="30" y="82" width="10" height="10"/></g>
-      <rect x="19" y="84" width="4" height="8" fill="var(--gold)"/>
+      <g fill="#0B0B24"><rect x="14" y="78" width="14" height="14"/><polygon points="12,78 21,70 30,78"/><rect x="30" y="82" width="10" height="10"/></g>
+      <rect x="19" y="84" width="4" height="8" fill="#CEFF59"/><rect x="33" y="85" width="3" height="3" fill="#CEFF59"/>
       <!-- fort -->
-      <g fill="var(--wagon)"><rect x="96" y="76" width="4" height="16"/><rect x="102" y="80" width="4" height="12"/><rect x="108" y="76" width="4" height="16"/><rect x="114" y="80" width="4" height="12"/><rect x="120" y="76" width="4" height="16"/></g>
-      <rect x="108" y="66" width="2" height="10" fill="var(--wagon)"/><rect x="110" y="66" width="8" height="5" fill="var(--red)"/>
+      <g fill="#0B0B24"><rect x="96" y="76" width="4" height="16"/><rect x="102" y="80" width="4" height="12"/><rect x="108" y="76" width="4" height="16"/><rect x="114" y="80" width="4" height="12"/><rect x="120" y="76" width="4" height="16"/></g>
+      <rect x="108" y="66" width="2" height="10" fill="#EEEDFB"/><rect x="110" y="66" width="8" height="5" fill="#FA1DF8"/>
       <!-- signpost at wagon check -->
-      <rect x="170" y="80" width="3" height="12" fill="var(--wagon)"/><rect x="164" y="78" width="15" height="5" fill="var(--gold)"/>
+      <rect x="170" y="80" width="3" height="12" fill="#0B0B24"/><rect x="164" y="78" width="15" height="5" fill="#CEFF59"/>
       <!-- Oregon flag -->
-      <rect x="298" y="68" width="3" height="24" fill="var(--wagon)"/><polygon points="301,68 316,73 301,78" fill="var(--sage)"/>
-      <!-- wagon -->
+      <rect x="298" y="68" width="3" height="24" fill="#EEEDFB"/><polygon points="301,68 316,73 301,78" fill="#CEFF59"/>
+      <!-- wagon, same colors as the deck: lavender cover, lime bed, purple wheels -->
       <g id="wagon" transform="translate(6,0)"><g class="bob">
-        <rect x="2" y="78" width="20" height="9" fill="var(--cover)"/><rect x="4" y="76" width="16" height="2" fill="var(--cover)"/>
-        <rect x="0" y="87" width="24" height="5" fill="var(--wagon)"/>
-        <rect x="2" y="92" width="7" height="7" fill="var(--wagon)"/><rect x="15" y="92" width="7" height="7" fill="var(--wagon)"/>
-        <rect x="4" y="94" width="3" height="3" fill="var(--trail)"/><rect x="17" y="94" width="3" height="3" fill="var(--trail)"/>
-        <rect x="24" y="88" width="6" height="2" fill="var(--wagon)"/>
+        <rect x="2" y="78" width="20" height="9" fill="#EEEDFB"/><rect x="4" y="76" width="16" height="2" fill="#EEEDFB"/>
+        <rect x="0" y="87" width="24" height="5" fill="#CEFF59"/>
+        <rect x="2" y="92" width="7" height="7" fill="#5F51CA"/><rect x="15" y="92" width="7" height="7" fill="#5F51CA"/>
+        <rect x="4" y="94" width="3" height="3" fill="#0B0B24"/><rect x="17" y="94" width="3" height="3" fill="#0B0B24"/>
+        <rect x="24" y="88" width="6" height="2" fill="#CEFF59"/>
       </g></g>
     </svg>
   </figure>
@@ -157,7 +196,7 @@ body.present .wrap{max-width:900px} body.present .rank{font-size:1.9rem} body.pr
 
   <div class="foot">
     <span>The Learning Ops Starter Kit. Sandie Dela Cruz, The Human Catalyst.</span>
-    <span><button type="button" id="bossLink">Leaderboard (trail boss)</button> &nbsp; <button type="button" id="restart">Start over</button></span>
+    <span><button type="button" id="soundBtn" aria-pressed="false">Sound: off</button> &nbsp; <button type="button" id="bossLink">Leaderboard (trail boss)</button> &nbsp; <button type="button" id="restart">Start over</button></span>
   </div>
 </div>
 
@@ -190,7 +229,8 @@ function hud(){
   $("hud").hidden=S.step<2||S.step===99||S.step===40;
   $("hudName").textContent=(S.name||"Your wagon");
   var h=$("hudHrs");h.textContent=S.hours+" hrs";h.className="hrs"+(S.hours<0?" neg":"");
-  $("hudStamps").innerHTML=S.stamps.map(function(v){return '<i class="'+(v?"on":"")+'"></i>';}).join("");
+  var prevSt=hud.st||S.stamps.slice();$("hudStamps").innerHTML=S.stamps.map(function(v,i){return '<i class="'+(v?"on":"")+(v&&!prevSt[i]?" pop":"")+'"></i>';}).join("");if(S.stamps.some(function(v,i){return v&&!prevSt[i];}))sfx("stamp");hud.st=S.stamps.slice();
+  if(hud.h!=null&&hud.h!==S.hours){h.classList.remove("bump");void h.offsetWidth;h.classList.add("bump");}hud.h=S.hours;
   var w=$("wagon"),x=S.step===30?({3:6,6:22,21:100,12:160,15:204}[S.gateNext]||6):(S.step>=21&&S.step<=23)?132:WAGON_X[Math.min(S.step,WAGON_X.length-1)];
   w.classList.add("roll");w.setAttribute("transform","translate("+x+",0)");
   w.style.transform="translate("+x+"px,0)";
@@ -356,7 +396,7 @@ var screens={
 
 12:function(){return trailEvent(12)+'<div class="where">Stop 4 of 5. The river.</div><h2>Your draft is ready</h2><p>Six people want a say before it ships. '+cast("sme")+' is one of them. The launch date is close. The water looks calm.</p><p>How will you cross?</p><div class="choices">'+
   choiceBtn(1,"Ford the river. Email it to all six and hope.","s4_ford")+choiceBtn(2,"Take the ferry. Spend a little time on a review plan first.","s4_ferry")+'</div>';},
-13:function(){if(S.pick.s4==="s4_ford")return '<svg class="tomb" viewBox="0 0 60 56" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="14" y="10" width="32" height="38" fill="var(--muted)"/><rect x="18" y="6" width="24" height="4" fill="var(--muted)"/><rect x="22" y="2" width="16" height="4" fill="var(--muted)"/><rect x="28" y="14" width="4" height="14" fill="var(--panel)"/><rect x="23" y="18" width="14" height="4" fill="var(--panel)"/><rect x="6" y="48" width="48" height="6" fill="var(--hill)"/></svg>'+
+13:function(){if(S.pick.s4==="s4_ford")return '<svg class="tomb" viewBox="0 0 60 56" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="14" y="10" width="32" height="38" fill="var(--muted)"/><rect x="18" y="6" width="24" height="4" fill="var(--muted)"/><rect x="22" y="2" width="16" height="4" fill="var(--muted)"/><rect x="28" y="14" width="4" height="14" fill="var(--panel)"/><rect x="23" y="18" width="14" height="4" fill="var(--panel)"/><rect x="6" y="48" width="48" height="6" fill="var(--gold)"/></svg>'+
   '<h2 style="text-align:center">You have died of review round seven.</h2><p style="text-align:center" class="muted" id="ripLine"></p>'+field("Write your epitaph","epitaph","One line for the tombstone. Famous last words work well.")+'<div style="height:14px"></div>'+
   '<p>Six reviewers. Six email threads. '+cast("sme")+' and Legal disagreed with each other. Round four. Round seven. The launch moved twice.</p>'+
   feedback(20,"Everyone reviewed everything, in six places, with no last round.","One job per reviewer. One place for feedback. Two rounds, then it ships.",14,"Pull the wagon out");
@@ -427,9 +467,9 @@ var screens={
 };
 function board(){var el=$("board");if(!el)return;var list=[];for(var i=1;i<=B.n;i++){var r=B.rows[i];if(r&&r.pts!==""&&r.pts!=null&&!isNaN(+r.pts))list.push({t:i,name:r.name||"",pts:+r.pts});}
   list.sort(function(a,b){return b.pts-a.pts||a.t-b.t;});var max=list.length?Math.max(1,list[0].pts):1,shown=B.top?list.slice(0,3):list,pos=0,last=null;
-  el.innerHTML=(list.length?'<h2 class="gold" style="text-align:center;margin-bottom:10px">Winner: '+(list[0].name?esc(list[0].name):'Table '+list[0].t)+'</h2>':'')+(list.length?shown.map(function(r,i){if(r.pts!==last){pos=i+1;last=r.pts;}
+  el.innerHTML=(list.length?'<h2 class="gold" style="text-align:center;margin-bottom:10px">'+(function(){var w=list.filter(function(r){return r.pts===list[0].pts;}).map(function(r){return r.name?esc(r.name):'Table '+r.t;});return (w.length>1?'Tie: ':'Winner: ')+w.join(' and ');})()+'</h2>':'')+(list.length?shown.map(function(r,i){if(r.pts!==last){pos=i+1;last=r.pts;}
     return '<div class="rank'+(pos<=3?" top":"")+'"><span class="pos">'+pos+'</span><span>'+(r.name?esc(r.name)+' <span class="muted">(Table '+r.t+')</span>':'Table '+r.t)+'<div class="bar" style="width:'+Math.max(4,Math.round(r.pts/max*100))+'%"></div></span><span class="pts">'+r.pts+'</span></div>';}).join("")+
-    (B.top&&list.length>3?'<p class="muted" style="margin-top:8px">'+(list.length-3)+' more wagons made it to Oregon.</p>':''):'<p class="muted">No scores yet.</p>');
+    (B.top&&list.length>3?'<p class="muted" style="margin-top:8px">'+(list.length-3)+(list.length-3===1?' more wagon':' more wagons')+' made it to Oregon.</p>':''):'<p class="muted">No scores yet.</p>');
   var bt=$("bTop"),bh=$("bHide"),be=$("bEntry");if(bt)bt.innerHTML="<b>1.</b>"+(B.top?"Show every table":"Show the top 3 only");
   if(bh)bh.innerHTML="<b>2.</b>"+(B.hide?"Show the score entry":"Hide the score entry for the big screen");if(be)be.style.display=B.hide?"none":"block";
   document.body.classList.toggle("present",!!B.hide&&S.step===99);}
@@ -453,9 +493,19 @@ function render(){
   var h=panel.querySelector("h1,h2");if(h){h.setAttribute("tabindex","-1");}
 }
 
+/* ---------- sound: 8-bit bleeps, off by default ---------- */
+var SKEY="learnops-trail-sound",snd=false,AC=null;
+try{snd=localStorage.getItem(SKEY)==="on";}catch(e){}
+function sfx(kind){if(!snd)return;try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();if(AC.state==="suspended")AC.resume();
+  var seq={tap:[[660,.05]],stamp:[[523,.08],[659,.08],[784,.08],[1047,.18]],gate:[[392,.08],[523,.08],[784,.18]],no:[[150,.2]]}[kind]||[[660,.05]];
+  var t=AC.currentTime+.01;seq.forEach(function(n){var o=AC.createOscillator(),g=AC.createGain();o.type="square";o.frequency.value=n[0];
+    g.gain.setValueAtTime(.05,t);g.gain.exponentialRampToValueAtTime(.001,t+n[1]);o.connect(g);g.connect(AC.destination);o.start(t);o.stop(t+n[1]);t+=n[1];});}catch(e){}}
+function sndLabel(){var b=$("soundBtn");if(b){b.textContent="Sound: "+(snd?"on":"off");b.setAttribute("aria-pressed",String(snd));}}
+
 /* ---------- events ---------- */
 panel.addEventListener("click",function(e){
   var b=e.target.closest("button");if(!b)return;
+  if(!b.dataset.stamp&&b.id!=="gateGo")sfx("tap");
   if(b.dataset.chip){if(b.classList.contains("got"))return;b.classList.add("got");b.textContent="Yes!";S.hunt=S.hunt||{yes:0};S.hunt.yes++;setTimeout(function(){if(b.parentNode)b.parentNode.removeChild(b);},350);return;}
   if(b.dataset.go){go(+b.dataset.go);return;}
   if(b.dataset.score){var p=b.dataset.score.split("_");S.check[+p[0]]=+p[1];save();
@@ -477,7 +527,7 @@ panel.addEventListener("click",function(e){
   if(b.id==="bHide"){B.hide=!B.hide;saveB();board();return;}
   if(b.id==="bClear"){if(window.confirm("Clear every score on the board?")){B.rows={};saveB();render();}return;}
   if(b.id==="gateGo"){var v=norm(($("gateIn")||{}).value),i=GATES[S.gateNext],ok=false;try{ok=(v===atob(GW[i])||v===atob(GM));}catch(e1){}
-    if(ok){S.open[i]=1;go(S.gateNext);}else{var gm=$("gateMsg");gm.style.display="block";gm.textContent=v?"That is not the word. Check the big screen, or ask a neighbor.":"Type the trail word from the big screen.";}return;}
+    if(ok){S.open[i]=1;sfx("gate");go(S.gateNext);}else{sfx("no");var gm=$("gateMsg");gm.style.display="block";gm.textContent=v?"That is not the word. Check the big screen, or ask a neighbor.":"Type the trail word from the big screen.";}return;}
   if(b.id==="copyKit"){var txt=kitText(),msg=$("copyMsg");msg.style.display="block";
     var done=function(){msg.className="live ok";msg.textContent="Copied. Paste it into an email to yourself.";},
         fail=function(){msg.className="live no";msg.textContent="Your browser blocked the copy. Press and hold the text above, choose Select all, then Copy. Or take a screenshot.";};
@@ -491,6 +541,8 @@ panel.addEventListener("change",function(e){var k=e.target.dataset&&e.target.dat
   if(k==="crew"){var p=points();var a=$("ptsBig"),c=$("crewN"),d=$("crewPts");if(a)a.textContent=p.total;if(c)c.textContent=+S.crew||0;if(d)d.textContent=p.crew;}});
 document.addEventListener("keydown",function(e){if(e.key==="Enter"&&e.target.id==="gateIn"){var g=$("gateGo");if(g)g.click();return;}
   if(/INPUT|TEXTAREA|SELECT/.test(e.target.tagName))return;var n=+e.key;if(n>=1&&n<=3){var c=panel.querySelectorAll(".choice");if(c[n-1])c[n-1].click();}});
+$("soundBtn").addEventListener("click",function(){snd=!snd;try{localStorage.setItem(SKEY,snd?"on":"off");}catch(e){}sndLabel();sfx("gate");});
+sndLabel();
 $("bossLink").addEventListener("click",function(){if(S.step!==99){S.prev=S.step;}go(99);});
 $("restart").addEventListener("click",function(){if(S.step>1&&!window.confirm("Start over? This clears everything you wrote."))return;if(timer){clearInterval(timer);timer=null;}S=fresh();save();render();});
 
