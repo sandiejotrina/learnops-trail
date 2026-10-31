@@ -144,6 +144,14 @@ body.present .rank .pts,body.present .rank .pos{font-size:3.2rem}
 .choice b{font-size:1.45rem;line-height:1}
 #board h2{font-size:2.2rem}
 .how li::marker{font-family:"VT323",monospace;font-weight:400;font-size:1.3rem}
+/* Hold it up: full-screen score for the stand-and-sit scoring on slide 10 */
+.go.alt{background:transparent;color:var(--gold);border-color:var(--gold)}
+.holdup{position:fixed;inset:0;z-index:50;background:var(--panel);border:6px solid var(--gold);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;cursor:pointer}
+.hu-t{font-family:"VT323","Courier New",monospace;font-size:min(18vw,12vh);line-height:1;color:var(--ink)}
+.hu-p{font-family:"VT323","Courier New",monospace;font-size:min(48vw,32vh);line-height:.9;color:var(--gold);text-shadow:6px 6px 0 var(--purple);margin:8px 0}
+.hu-l{font-family:"Pixelify Sans",sans-serif;font-weight:700;font-size:min(8vw,6vh);text-transform:uppercase;letter-spacing:.06em}
+.hu-x{margin-top:28px;background:none;border:0;color:var(--muted);text-decoration:underline;text-underline-offset:3px;font-size:1rem;min-height:44px}
+.late{text-align:center;margin:10px 0 0;font-size:1rem}
 @media (prefers-reduced-motion: reduce){
   #wagon{transition:none}#wagon.roll .bob,.chip,.twinkle,.stamps i.pop,.hud .hrs.bump,p:has(+ .choices)::after{animation:none}}
 </style>
@@ -426,7 +434,7 @@ var screens={
   return '<div class="where">The end of the trail</div><h1>'+rank+'</h1><p style="margin-top:10px">You arrived with <span class="'+(h<0?"red":"gold")+'">'+h+' hours</span> and <span class="gold">'+st+' of 5</span> stamps.</p>'+
   (h<0?'<p class="muted">Below zero means your team is over capacity. That is most teams. Now you can show it.</p>':'')+
   (S.table?field("Crew bonus: how many people at your table filled in at least 3 templates?","crew","Count yourself. 50 points each. Nobody gets left on the trail.","select",["0","1","2","3","4","5","6","7","8","9","10","11","12"]):'')+
-  scoreCard()+(S.table?'<p class="muted">Hold this screen up when Sandie calls for scores.</p>':'')+
+  scoreCard()+'<button type="button" class="go alt" id="holdUp">Hold it up</button>'+(S.table?'<p class="muted" style="margin-top:10px">Hold this screen up when Sandie calls for scores.</p>':'')+
   '<div class="box"><p><span class="tag sage">Your first move.</span> '+(low>=0?'Your lowest score was line '+(low+1)+'. Start with your <span class="gold">'+TPL[low].toLowerCase()+'</span>.':'Pick the one template that would help most this week.')+'</p><p>One template, not five. Use it yourself for two weeks. Call it a draft. People help fix a draft. They push back on a rollout.</p></div>'+
   field("On Monday, I will:","monday",null,"area")+goBtn("See my starter kit",20);},
 20:function(){return '<div class="where">Take it with you</div><h2>Your starter kit</h2><p class="muted">Everything you wrote today. Copy it and paste it into an email to yourself.</p>'+
@@ -438,7 +446,7 @@ var screens={
   '<div class="where" style="text-align:center">Gate '+(i+1)+' of 5</div><h2 style="text-align:center">'+names[i]+' is locked</h2>'+
   '<p style="text-align:center">The whole wagon train moves together. Sandie will put the <span class="gold">trail word</span> on the big screen.</p>'+
   '<label for="gateIn">Trail word</label><input type="text" id="gateIn" autocomplete="off" autocapitalize="characters" spellcheck="false"><div id="gateMsg" class="live no" style="display:none"></div>'+
-  '<button type="button" class="go" id="gateGo">Open the gate</button>'+
+  '<button type="button" class="go" id="gateGo">Open the gate</button>'+'<p class="late muted">Joined late? Ask Sandie for the catch-up word.</p>'+
   '<div class="box"><p><span class="tag sage">While you wait.</span> Look around your table. Is anyone still writing? Go help. Every tablemate who fills in 3 templates is worth 50 points to your wagon.</p></div>';},
 40:function(){return '<div class="where">How to play</div><h2>Five stops. Five templates. One wagon.</h2><div class="how"><ol>'+
   '<li><span class="gold">Name your wagon</span> and the three people riding with you. They will show up on the trail.</li>'+
@@ -522,6 +530,9 @@ panel.addEventListener("click",function(e){
     if(k.indexOf("s4_")===0){S.pick.s4=k;spend(k==="s4_ford"?20:2);go(13);return;}
     if(k.indexOf("s5_")===0){S.pick.s5=k;spend(k==="s5_ford"?10:1);go(16);return;}
   }
+  if(b.id==="holdUp"){var hp=points(),o=document.createElement("div");o.className="holdup";o.setAttribute("role","dialog");o.setAttribute("aria-modal","true");o.setAttribute("aria-label","Your score, full screen");
+    o.innerHTML='<div class="hu-t">'+(S.table?'Table '+esc(S.table):esc(S.name||"Your wagon"))+'</div><div class="hu-p">'+hp.total+'</div><div class="hu-l">points</div><button type="button" class="hu-x">Tap anywhere to close</button>';
+    o.addEventListener("click",function(){if(o.parentNode)o.parentNode.removeChild(o);var hb=$("holdUp");if(hb)hb.focus();});document.body.appendChild(o);o.querySelector(".hu-x").focus();sfx("gate");return;}
   if(b.id==="bBack"){go(S.prev||0);return;}
   if(b.id==="bTop"){B.top=!B.top;saveB();board();return;}
   if(b.id==="bHide"){B.hide=!B.hide;saveB();board();return;}
@@ -539,7 +550,7 @@ panel.addEventListener("input",function(e){var bk=e.target.dataset&&e.target.dat
   var k=e.target.dataset&&e.target.dataset.k;if(!k)return;set(k,e.target.value);save();liveAll();});
 panel.addEventListener("change",function(e){var k=e.target.dataset&&e.target.dataset.k;if(!k)return;set(k,e.target.value);save();liveAll();
   if(k==="crew"){var p=points();var a=$("ptsBig"),c=$("crewN"),d=$("crewPts");if(a)a.textContent=p.total;if(c)c.textContent=+S.crew||0;if(d)d.textContent=p.crew;}});
-document.addEventListener("keydown",function(e){if(e.key==="Enter"&&e.target.id==="gateIn"){var g=$("gateGo");if(g)g.click();return;}
+document.addEventListener("keydown",function(e){if(e.key==="Escape"){var ho=document.querySelector(".holdup");if(ho){ho.click();return;}}if(e.key==="Enter"&&e.target.id==="gateIn"){var g=$("gateGo");if(g)g.click();return;}
   if(/INPUT|TEXTAREA|SELECT/.test(e.target.tagName))return;var n=+e.key;if(n>=1&&n<=3){var c=panel.querySelectorAll(".choice");if(c[n-1])c[n-1].click();}});
 $("soundBtn").addEventListener("click",function(){snd=!snd;try{localStorage.setItem(SKEY,snd?"on":"off");}catch(e){}sndLabel();sfx("gate");});
 sndLabel();
