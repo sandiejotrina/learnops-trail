@@ -1,0 +1,504 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The LearnOps Trail</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@500;700&family=VT323&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F3EAD3; --panel:#FBF5E6; --ink:#2A1838; --muted:#6B5A78; --gold:#8A5E00; --sage:#2F6B45; --red:#B3361B;
+  --line:#CDBF9F; --sky1:#CFE3E8; --sky2:#F3D9B1; --hill:#7FB685; --hill2:#5E9A68; --trail:#B98A3E; --river:#2F86B5;
+  --wagon:#2A1838; --cover:#FFFFFF; --field:#FFFFFF; --shadow:#2A1838;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#1B1026; --panel:#261735; --ink:#F3EAD3; --muted:#B9A9C9; --gold:#F2C14E; --sage:#8FD19E; --red:#FF7A5C;
+    --line:#4A3560; --sky1:#2B1B4A; --sky2:#6A3472; --hill:#3E6B4F; --hill2:#2C4F3B; --trail:#D9B26A; --river:#3FA7D6;
+    --wagon:#F3EAD3; --cover:#F2C14E; --field:#1B1026; --shadow:#0D0714;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#1B1026; --panel:#261735; --ink:#F3EAD3; --muted:#B9A9C9; --gold:#F2C14E; --sage:#8FD19E; --red:#FF7A5C;
+  --line:#4A3560; --sky1:#2B1B4A; --sky2:#6A3472; --hill:#3E6B4F; --hill2:#2C4F3B; --trail:#D9B26A; --river:#3FA7D6;
+  --wagon:#F3EAD3; --cover:#F2C14E; --field:#1B1026; --shadow:#0D0714;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"VT323","Courier New",ui-monospace,monospace;font-size:1.4rem;line-height:1.22}
+.wrap{max-width:640px;margin:0 auto;padding:12px 14px 40px}
+h1,h2,.disp{font-family:"Pixelify Sans","Trebuchet MS",Verdana,sans-serif;font-weight:700;line-height:1.08;margin:0}
+h1{font-size:2.3rem;letter-spacing:.01em}
+h2{font-size:1.45rem;margin:0 0 8px}
+p{margin:0 0 12px}
+.muted{color:var(--muted)}
+.gold{color:var(--gold)} .sage{color:var(--sage)} .red{color:var(--red)}
+
+/* HUD */
+.hud{display:flex;align-items:center;gap:10px;justify-content:space-between;border:2px solid var(--ink);background:var(--panel);padding:6px 10px;box-shadow:4px 4px 0 var(--shadow)}
+.hud[hidden]{display:none}
+.hud .name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;flex:1}
+.hud .hrs{font-family:"Pixelify Sans",sans-serif;font-weight:700;white-space:nowrap}
+.hud .hrs.neg{color:var(--red)}
+.stamps{display:flex;gap:4px}
+.stamps i{display:block;width:16px;height:16px;border:2px solid var(--ink)}
+.stamps i.on{background:var(--gold)}
+
+/* Scene */
+.scene{margin:12px 0 0;border:2px solid var(--ink);box-shadow:4px 4px 0 var(--shadow);background:var(--sky1);overflow:hidden}
+.scene svg{display:block;width:100%;height:auto;shape-rendering:crispEdges}
+#wagon{transition:transform 1.4s steps(14)}
+#wagon.roll .bob{animation:bob .35s steps(2) infinite}
+@keyframes bob{50%{transform:translateY(-1px)}}
+@media (prefers-reduced-motion: reduce){#wagon{transition:none}#wagon.roll .bob{animation:none}}
+
+/* Panel */
+.panel{margin-top:12px;border:2px solid var(--ink);background:var(--panel);padding:16px 14px 18px;box-shadow:4px 4px 0 var(--shadow)}
+.where{font-family:"Pixelify Sans",sans-serif;font-weight:500;font-size:1rem;color:var(--muted);margin-bottom:4px}
+.choices{display:grid;gap:10px;margin-top:6px}
+button{font:inherit;color:inherit;cursor:pointer}
+.choice,.go{display:block;width:100%;text-align:left;background:var(--bg);border:2px solid var(--ink);padding:10px 12px;box-shadow:3px 3px 0 var(--shadow)}
+.choice b{color:var(--gold);margin-right:6px}
+.go{background:var(--ink);color:var(--bg);text-align:center;font-family:"Pixelify Sans",sans-serif;font-weight:700;font-size:1.15rem;margin-top:14px}
+.ghost{background:transparent;border:0;text-decoration:underline;color:var(--muted);padding:8px 0;margin-top:6px;font-size:1.15rem}
+.choice:active,.go:active{transform:translate(3px,3px);box-shadow:none}
+button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.box{border:2px dashed var(--line);padding:10px 12px;margin:12px 0}
+.box p:last-child{margin-bottom:0}
+.tag{font-family:"Pixelify Sans",sans-serif;font-weight:700;font-size:1rem}
+.cost{font-family:"Pixelify Sans",sans-serif;font-weight:700;font-size:1.3rem}
+
+/* Forms */
+label{display:block;margin:12px 0 4px}
+label small{display:block;color:var(--muted);font-size:1.1rem;line-height:1.1}
+input[type=text],textarea,select{width:100%;font:inherit;font-size:1.3rem;color:var(--ink);background:var(--field);border:2px solid var(--ink);padding:8px;border-radius:0;-webkit-appearance:none;appearance:none}
+textarea{min-height:64px;resize:vertical}
+select{background-image:linear-gradient(45deg,transparent 50%,var(--ink) 50%),linear-gradient(135deg,var(--ink) 50%,transparent 50%);background-position:calc(100% - 18px) 55%,calc(100% - 12px) 55%;background-size:6px 6px;background-repeat:no-repeat}
+.row{border-top:2px solid var(--line);margin-top:14px;padding-top:2px}
+.live{border:2px solid var(--ink);padding:8px 10px;margin-top:14px;background:var(--bg)}
+.live.ok{border-color:var(--sage)} .live.no{border-color:var(--red)}
+pre{font:inherit;white-space:pre-wrap;word-break:break-word;margin:0}
+.scale{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:6px}
+.scale button{border:2px solid var(--ink);background:var(--bg);padding:8px 0;font-family:"Pixelify Sans",sans-serif;font-weight:700}
+.scale button[aria-pressed=true]{background:var(--gold);color:var(--bg)}
+.timer{font-family:"Pixelify Sans",sans-serif;font-weight:700;font-size:3rem;text-align:center;color:var(--red);margin:4px 0}
+.tomb{display:block;margin:4px auto 10px;width:150px;height:auto;shape-rendering:crispEdges}
+.foot{margin-top:18px;font-size:1.1rem;color:var(--muted);display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.foot button{background:none;border:0;padding:0;color:var(--muted);text-decoration:underline;font-size:1.1rem}
+.score{border:2px solid var(--ink);background:var(--bg);padding:12px;margin:14px 0;text-align:center}
+.score .big{font-family:"Pixelify Sans",sans-serif;font-weight:700;font-size:3.2rem;line-height:1;color:var(--gold)}
+.score table{width:100%;border-collapse:collapse;margin-top:10px;text-align:left}
+.score td{padding:3px 0;border-top:2px dotted var(--line)} .score td:last-child{text-align:right;font-family:"Pixelify Sans",sans-serif;font-weight:700}
+.entry{display:grid;grid-template-columns:3.2rem 1fr 6.5rem;gap:6px;align-items:center;margin-top:6px}
+.entry span{font-family:"Pixelify Sans",sans-serif;font-weight:700}
+.rank{display:grid;grid-template-columns:2.6rem 1fr auto;gap:8px;align-items:center;padding:8px 0;border-top:2px solid var(--line)}
+.rank .pos{font-family:"Pixelify Sans",sans-serif;font-weight:700;font-size:1.6rem}
+.rank .bar{height:10px;background:var(--gold);margin-top:4px}
+.rank .pts{font-family:"Pixelify Sans",sans-serif;font-weight:700;font-size:1.5rem}
+.rank.top .pos,.rank.top .pts{color:var(--gold)}
+body.present .wrap{max-width:900px} body.present .rank{font-size:1.9rem} body.present .rank .pts,body.present .rank .pos{font-size:2.4rem}
+.arena{position:relative;height:300px;overflow:hidden;border:2px solid var(--ink);background:var(--bg);touch-action:manipulation;margin-top:6px}
+.chip{position:absolute;left:0;white-space:nowrap;border:2px solid var(--ink);background:var(--panel);color:var(--ink);padding:7px 9px;font-size:1.2rem;box-shadow:2px 2px 0 var(--shadow);animation:fly 4.2s linear forwards}
+.chip.got{background:var(--gold);color:var(--bg);animation-play-state:paused}
+@keyframes fly{from{transform:translateX(-100%)}to{transform:translateX(660px)}}
+@media (prefers-reduced-motion: reduce){.chip{animation:none}}
+.lock{display:block;margin:0 auto 10px;width:84px;height:auto;shape-rendering:crispEdges}
+.how li{margin:0 0 10px}
+.how ol{padding-left:1.4em;margin:0 0 12px}
+.trailev{border:2px solid var(--line);border-left:8px solid var(--gold);padding:8px 10px;margin:0 0 14px;background:var(--bg)}
+.trailev.bad{border-left-color:var(--red)} .trailev.good{border-left-color:var(--sage)}
+.trailev p{margin:0}
+.grave{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;align-items:baseline;padding:6px 0;border-top:2px dotted var(--line)}
+.kit{max-height:50vh;overflow:auto;border:2px solid var(--ink);background:var(--field);padding:10px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hud" id="hud" hidden>
+    <span class="name" id="hudName"></span>
+    <span class="stamps" id="hudStamps" aria-label="Stamps collected"></span>
+    <span class="hrs" id="hudHrs"></span>
+  </div>
+
+  <figure class="scene" aria-hidden="true">
+    <svg viewBox="0 0 320 110" xmlns="http://www.w3.org/2000/svg">
+      <defs><linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--sky1)"/><stop offset="1" stop-color="var(--sky2)"/></linearGradient></defs>
+      <rect width="320" height="110" fill="url(#sky)"/>
+      <rect x="262" y="14" width="12" height="12" fill="var(--gold)"/>
+      <polygon points="0,70 40,48 80,66 130,40 180,68 230,50 280,66 320,52 320,110 0,110" fill="var(--hill2)"/>
+      <polygon points="0,84 60,70 120,82 190,72 250,84 320,74 320,110 0,110" fill="var(--hill)"/>
+      <!-- river -->
+      <polygon points="226,72 240,72 252,110 232,110" fill="var(--river)"/>
+      <!-- trail -->
+      <g fill="var(--trail)"><rect x="8" y="98" width="8" height="3"/><rect x="24" y="98" width="8" height="3"/><rect x="40" y="98" width="8" height="3"/><rect x="56" y="98" width="8" height="3"/><rect x="72" y="98" width="8" height="3"/><rect x="88" y="98" width="8" height="3"/><rect x="104" y="98" width="8" height="3"/><rect x="120" y="98" width="8" height="3"/><rect x="136" y="98" width="8" height="3"/><rect x="152" y="98" width="8" height="3"/><rect x="168" y="98" width="8" height="3"/><rect x="184" y="98" width="8" height="3"/><rect x="200" y="98" width="8" height="3"/><rect x="216" y="98" width="8" height="3"/><rect x="256" y="98" width="8" height="3"/><rect x="272" y="98" width="8" height="3"/><rect x="288" y="98" width="8" height="3"/></g>
+      <!-- town -->
+      <g fill="var(--wagon)"><rect x="14" y="78" width="14" height="14"/><polygon points="12,78 21,70 30,78"/><rect x="30" y="82" width="10" height="10"/></g>
+      <rect x="19" y="84" width="4" height="8" fill="var(--gold)"/>
+      <!-- fort -->
+      <g fill="var(--wagon)"><rect x="96" y="76" width="4" height="16"/><rect x="102" y="80" width="4" height="12"/><rect x="108" y="76" width="4" height="16"/><rect x="114" y="80" width="4" height="12"/><rect x="120" y="76" width="4" height="16"/></g>
+      <rect x="108" y="66" width="2" height="10" fill="var(--wagon)"/><rect x="110" y="66" width="8" height="5" fill="var(--red)"/>
+      <!-- signpost at wagon check -->
+      <rect x="170" y="80" width="3" height="12" fill="var(--wagon)"/><rect x="164" y="78" width="15" height="5" fill="var(--gold)"/>
+      <!-- Oregon flag -->
+      <rect x="298" y="68" width="3" height="24" fill="var(--wagon)"/><polygon points="301,68 316,73 301,78" fill="var(--sage)"/>
+      <!-- wagon -->
+      <g id="wagon" transform="translate(6,0)"><g class="bob">
+        <rect x="2" y="78" width="20" height="9" fill="var(--cover)"/><rect x="4" y="76" width="16" height="2" fill="var(--cover)"/>
+        <rect x="0" y="87" width="24" height="5" fill="var(--wagon)"/>
+        <rect x="2" y="92" width="7" height="7" fill="var(--wagon)"/><rect x="15" y="92" width="7" height="7" fill="var(--wagon)"/>
+        <rect x="4" y="94" width="3" height="3" fill="var(--trail)"/><rect x="17" y="94" width="3" height="3" fill="var(--trail)"/>
+        <rect x="24" y="88" width="6" height="2" fill="var(--wagon)"/>
+      </g></g>
+    </svg>
+  </figure>
+
+  <main class="panel" id="panel" aria-live="polite"></main>
+
+  <div class="foot">
+    <span>The Learning Ops Starter Kit. Sandie Dela Cruz, The Human Catalyst.</span>
+    <span><button type="button" id="bossLink">Leaderboard (trail boss)</button> &nbsp; <button type="button" id="restart">Start over</button></span>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+var KEY="learnops-trail-v1",BKEY="learnops-trail-board-v1";
+var B={n:15,rows:{},top:true,hide:false};
+try{var rb=localStorage.getItem(BKEY);if(rb){var ob=JSON.parse(rb);if(ob&&ob.rows)B=Object.assign(B,ob);}}catch(e){}
+function saveB(){try{localStorage.setItem(BKEY,JSON.stringify(B));}catch(e){}}
+var fresh=function(){return {step:0,hours:40,name:"",party:"",check:[0,0,0,0,0],stamps:[0,0,0,0,0],pick:{},
+  t1:{who:"",what:"",problem:"",success:"",when:""},
+  t2:{project:"",sponsor:"",status:"On track",done:"",next:"",ask:"",by:"",me:""},
+  t3:[{req:"",owner:"",status:"In progress",outcome:""},{req:"",owner:"",status:"In progress",outcome:""},{req:"",owner:"",status:"In progress",outcome:""}],
+  t4:{what:"",place:"",r1:"",r2:"",approver:"",rev:[{n:"",j:""},{n:"",j:""},{n:"",j:""}]},
+  t5:{project:"",plan:"",slow:"",again:"",change:"",owner:"",tpl:""},
+  fort:"",monday:"",table:"",crew:0,cast:{ask:"",sme:"",mate:""},ev:{},hunt:null,epitaph:"",mode:"",open:{},gateNext:0};};
+var S=fresh();
+try{var raw=localStorage.getItem(KEY);if(raw){var o=JSON.parse(raw);if(o&&typeof o.step==="number"){S=Object.assign(fresh(),o);if(!S.cast)S.cast={ask:"",sme:"",mate:""};if(!S.ev)S.ev={};if(!S.open)S.open={};}}}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
+var $=function(id){return document.getElementById(id);};
+var panel=$("panel"),timer=null;
+
+var TPL=["Request form","Status update","Project tracker","Review plan","Lessons learned"];
+var WAGON_X=[6,6,6,22,22,22,100,100,100,160,160,160,204,204,204,238,262,286,286,290,290];
+
+function spend(n,why){S.hours-=n;}
+function hud(){
+  $("hud").hidden=S.step<2||S.step===99||S.step===40;
+  $("hudName").textContent=(S.name||"Your wagon");
+  var h=$("hudHrs");h.textContent=S.hours+" hrs";h.className="hrs"+(S.hours<0?" neg":"");
+  $("hudStamps").innerHTML=S.stamps.map(function(v){return '<i class="'+(v?"on":"")+'"></i>';}).join("");
+  var w=$("wagon"),x=S.step===30?({3:6,6:22,21:100,12:160,15:204}[S.gateNext]||6):(S.step>=21&&S.step<=23)?132:WAGON_X[Math.min(S.step,WAGON_X.length-1)];
+  w.classList.add("roll");w.setAttribute("transform","translate("+x+",0)");
+  w.style.transform="translate("+x+"px,0)";
+  setTimeout(function(){w.classList.remove("roll");},1500);
+}
+var GATES={3:0,6:1,21:2,12:3,15:4},GW=['V0FHT04=', 'Rk9SVA==', 'V0hFRUw=', 'UklWRVI=', 'T1JFR09O'],GM="V0FHT05TSE8=";
+function norm(v){return String(v||"").toUpperCase().replace(/[^A-Z]/g,"");}
+function go(n){clearHunt();if(timer){clearInterval(timer);timer=null;}
+  if(S.mode==="room"&&GATES[n]!=null&&!S.open[GATES[n]]){S.gateNext=n;n=30;}S.step=n;save();render();window.scrollTo({top:0,behavior:"auto"});}
+function choiceBtn(i,label,key){return '<button type="button" class="choice" data-pick="'+key+'"><b>'+i+'.</b>'+label+'</button>';}
+function goBtn(label,step){return '<button type="button" class="go" data-go="'+step+'">'+label+'</button>';}
+function field(label,path,hint,type,opts){
+  var v=get(path),id="f_"+path.replace(/\W/g,"_"),h='<label for="'+id+'">'+label+(hint?'<small>'+hint+'</small>':'')+'</label>';
+  if(type==="area")return h+'<textarea id="'+id+'" data-k="'+path+'">'+esc(v)+'</textarea>';
+  if(type==="select")return h+'<select id="'+id+'" data-k="'+path+'">'+opts.map(function(o){return '<option'+(o===v?' selected':'')+'>'+esc(o)+'</option>';}).join("")+'</select>';
+  return h+'<input type="text" id="'+id+'" data-k="'+path+'" value="'+esc(v)+'" autocomplete="off">';
+}
+function get(path){return path.split(".").reduce(function(a,k){return a==null?a:a[k];},S);}
+function set(path,val){var ks=path.split("."),o=S;for(var i=0;i<ks.length-1;i++)o=o[ks[i]];o[ks[ks.length-1]]=val;}
+function gate(next){return '<div class="box"><p class="muted">In the room? Wait for Sandie to call "Wagons ho." On your own? Roll on.</p></div>'+goBtn("Wagons ho",next);}
+function feedback(cost,cause,fix,next,label){
+  return '<p class="cost red">'+(cost>0?"You lost "+cost+" hours.":"No hours lost.")+'</p>'+
+  '<div class="box"><p><span class="tag red">Why it happened.</span> '+cause+'</p><p><span class="tag sage">The fix.</span> '+fix+'</p></div>'+goBtn(label||"Build the fix",next);
+}
+
+/* ---------- live checks ---------- */
+function liveT1(){var el=$("liveT1");if(!el)return;var t=S.t1,msg,ok=false;
+  if(!t.problem.trim())msg="Not ready. Send it back and ask: what goes wrong if people do not learn this?";
+  else if(!t.success.trim())msg="Almost. Ask what success looks like before you start.";
+  else if(!t.when.trim())msg="Almost. Get a real date and the reason behind it.";
+  else{msg="Ready. This request can go on your list.";ok=true;}
+  el.className="live "+(ok?"ok":"no");el.textContent=msg;}
+function emailT2(){var t=S.t2;
+  return "Subject: Project update: "+(t.project||"[project]")+" ("+t.status+")\n\nHi "+(t.sponsor||"[name]")+",\n\nQuick update on "+(t.project||"[project]")+".\n\nStatus: "+t.status+
+  "\nDone this week: "+(t.done||"[what got done]")+"\nNext week: "+(t.next||"[what is coming]")+
+  "\nNeed from you: "+(t.ask.trim()?t.ask+(t.by.trim()?" by "+t.by:"")+".":"Nothing right now.")+"\n\n"+(t.me||"[your name]");}
+function liveT2(){var el=$("liveT2");if(!el)return;el.textContent=emailT2();
+  var a=$("askT2");if(a){var t=S.t2,ok=t.ask.trim()&&t.by.trim();a.className="live "+(ok||!t.ask.trim()?"ok":"no");
+  a.textContent=!t.ask.trim()?"No ask this week. That is fine. The email says so.":(ok?"Clear. One ask, one date.":"Add a date. One ask, one date.");}}
+function liveT3(){var el=$("liveT3");if(!el)return;var rows=S.t3.filter(function(r){return r.req.trim();});
+  var noOut=rows.filter(function(r){return !r.outcome.trim();}).length,noOwn=rows.filter(function(r){return !r.owner.trim();}).length;
+  if(!rows.length){el.className="live no";el.textContent="Add at least one real piece of work.";return;}
+  var bad=noOut||noOwn;el.className="live "+(bad?"no":"ok");
+  el.textContent=bad?((noOwn?noOwn+" with no owner. ":"")+(noOut?noOut+" with no outcome. ":"")+"That is a talk to have this week."):"Every row has an owner and an outcome. Nothing falls off this wagon.";}
+function liveT4(){var el=$("liveT4");if(!el)return;var rev=S.t4.rev.filter(function(r){return r.n.trim();});
+  var jobs=rev.map(function(r){return r.j;}).filter(Boolean),dupe=jobs.some(function(j,i){return jobs.indexOf(j)!==i;}),nojob=rev.some(function(r){return !r.j;});
+  var msg,ok=false;
+  if(!rev.length)msg="Add at least one reviewer.";
+  else if(nojob)msg="Someone has no job. Give every reviewer one job.";
+  else if(dupe)msg="Two reviewers share a job. Split it or drop one.";
+  else if(!S.t4.place.trim())msg="Where does feedback go? Pick one place.";
+  else{msg="One job each. One place. Two rounds. Safe to cross.";ok=true;}
+  el.className="live "+(ok?"ok":"no");el.textContent=msg;}
+function liveAll(){liveT1();liveT2();liveT3();liveT4();liveRip();}
+
+function points(){var st=S.stamps.reduce(function(a,b){return a+b;},0);
+  var river=S.pick.s5==="s5_ferry"?(S.pick.s4==="s4_ford"?150:100):0;
+  var p={hours:Math.max(0,S.hours)*10,stamps:st*100,river:river,crew:(S.table?Math.min(12,+S.crew||0)*50:0)};
+  p.total=p.hours+p.stamps+p.river+p.crew;return p;}
+function scoreCard(){var p=points();
+  return '<div class="score">'+(S.table?'<div class="disp" style="font-size:1.3rem">Table '+esc(S.table)+'</div>':'')+'<div class="big" id="ptsBig">'+p.total+'</div><div>points</div>'+
+  '<table><tr><td>Hours left ('+Math.max(0,S.hours)+' x 10)</td><td>'+p.hours+'</td></tr><tr><td>Stamps ('+(p.stamps/100)+' x 100)</td><td>'+p.stamps+'</td></tr>'+
+  '<tr><td>'+(p.river===150?"Comeback at the second river":p.river===100?"Dry at both rivers":"Second river")+'</td><td>'+p.river+'</td></tr>'+
+  (S.table?'<tr><td>Crew bonus (<span id="crewN">'+(+S.crew||0)+'</span> x 50)</td><td id="crewPts">'+p.crew+'</td></tr>':'')+'</table></div>';}
+function kitText(){var t1=S.t1,t3=S.t3.filter(function(r){return r.req.trim();}),t4=S.t4,t5=S.t5;
+  var L=[];
+  L.push("THE LEARNOPS TRAIL: MY STARTER KIT","Wagon: "+(S.name||"(no name)")+(S.table?"   Table "+S.table:"")+"   Hours left: "+S.hours+"   Points: "+points().total,(S.pick.s4==="s4_ford"&&S.epitaph?"Epitaph: "+S.epitaph:""),"");
+  L.push("1. REQUEST FORM","Who is asking: "+t1.who,"What they asked for: "+t1.what,"What goes wrong if people do not learn this: "+t1.problem,"What success looks like: "+t1.success,"When, and what drives the date: "+t1.when,"");
+  L.push("2. STATUS UPDATE",emailT2(),"");
+  L.push("3. PROJECT TRACKER");
+  if(t3.length)t3.forEach(function(r,i){L.push((i+1)+") "+r.req+" | Owner: "+(r.owner||"NONE")+" | "+r.status+" | Outcome: "+(r.outcome||"NONE"));});else L.push("(empty)");
+  L.push("","4. REVIEW PLAN","Reviewing: "+t4.what);
+  t4.rev.filter(function(r){return r.n.trim();}).forEach(function(r){L.push("- "+r.n+": "+(r.j||"no job yet"));});
+  L.push("Feedback goes in: "+t4.place,"Round 1 due: "+t4.r1,"Round 2 due (last round): "+t4.r2,"Final approver: "+t4.approver,"Rule: feedback after round 2 goes into the next version.","");
+  L.push("5. LESSONS LEARNED","Project: "+t5.project,"Planned vs what happened: "+t5.plan,"What slowed us down: "+t5.slow,"What we would do again: "+t5.again,"ONE change for next time: "+t5.change,"Owner: "+t5.owner,"Template it changes: "+t5.tpl,"");
+  L.push("ON MONDAY I WILL: "+S.monday);
+  return L.join("\n");}
+
+/* ---------- the fun parts ---------- */
+var CAST_DEFAULT={ask:"Dave from Sales",sme:"Your expert",mate:"Your teammate"};
+function cast(k){var v=(S.cast&&S.cast[k]||"").trim();return esc(v||CAST_DEFAULT[k]);}
+var EVENTS=[
+ {h:-2,t:'{ask} sent a "quick question." It was not quick.'},
+ {h:-3,t:'{sme} went on vacation. Nobody told you.'},
+ {h:-4,t:'A reorg. Your sponsor changed. You explain the whole project again.'},
+ {h:-2,t:'The LMS went down for an afternoon.'},
+ {h:-3,t:'{ask} stopped you in the hallway. "Can we add one more module?"'},
+ {h:-2,t:'{mate} is out sick. You cover the help desk.'},
+ {h:3,t:'{mate} found an old template that still works.'},
+ {h:2,t:'A meeting got cancelled. Nobody is sad.'},
+ {h:3,t:'{sme} turned a review around in one day. Buy them a coffee.'},
+ {h:0,t:'Clear skies. The wagon rolls.'}];
+function trailEvent(step){
+  if(S.mode==="room")return "";
+  if(!S.ev[step]){var used=Object.keys(S.ev).map(function(k){return S.ev[k].i;}),pool=[];
+    EVENTS.forEach(function(_,i){if(used.indexOf(i)<0)pool.push(i);});
+    var i=pool[Math.floor(Math.random()*pool.length)];S.ev[step]={i:i};S.hours+=EVENTS[i].h;save();}
+  var e=EVENTS[S.ev[step].i],txt=e.t.replace("{ask}",cast("ask")).replace("{sme}",cast("sme")).replace("{mate}",cast("mate"));
+  return '<div class="trailev '+(e.h<0?"bad":e.h>0?"good":"")+'"><p><span class="tag">On the trail.</span> '+txt+' <span class="tag '+(e.h<0?"red":"sage")+'">'+(e.h<0?"Lose "+(-e.h)+" hours.":e.h>0?"Gain "+e.h+" hours.":"")+'</span></p></div>';}
+var REQS=["Quick course on communication","Compliance renewal, due in 3 weeks","Refresh the slides","Fix new hire ramp time","Can you make it pop?","Product launch training","A team building thing","Update for version 4.2","Lunch and learn, Friday","Job aid for the expense tool","Fix the old quiz","Leadership program","Record my webinar","Turn this PDF into a course","Safety recert update","One more module"];
+var huntT=[];
+function clearHunt(){huntT.forEach(function(t){clearInterval(t);clearTimeout(t);});huntT=[];}
+function carry(){return S.party==="p_solo"?2:S.party==="p_big"?5:3;}
+function startHunt(){var arena=$("arena"),clock=$("huntClock"),left=15,n=Math.floor(Math.random()*REQS.length);if(!arena)return;S.hunt={yes:0,done:false};save();
+  var rm=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  function spawn(){var b=document.createElement("button");b.type="button";b.className="chip";b.dataset.chip="1";b.textContent=REQS[n++%REQS.length];
+    b.style.top=(4+Math.random()*80)+"%";if(rm)b.style.left=(4+Math.random()*45)+"%";arena.appendChild(b);
+    huntT.push(setTimeout(function(){if(b.parentNode)b.parentNode.removeChild(b);},rm?1900:4200));}
+  spawn();huntT.push(setInterval(spawn,650));
+  huntT.push(setInterval(function(){left--;if(clock)clock.textContent=left;if(left<=0)go(23);},1000));}
+function liveRip(){var el=$("ripLine");if(!el)return;var e=(S.epitaph||"").trim();el.textContent="Here lies "+(S.name||"your wagon")+". "+(e?'"'+e+'"':"It shipped in the next life.");}
+
+function quick(what){return S.mode==="room"?'<div class="trailev good"><p><span class="tag sage">Quick fill. 60 seconds.</span> Just write '+what+'. That earns the stamp. Finish the rest later. Your work is saved on this phone.</p></div>':"";}
+/* ---------- screens ---------- */
+var screens={
+0:function(){return '<h1>The LearnOps Trail</h1><p class="muted" style="margin-top:8px">Five stops. Five templates. One wagon.</p>'+
+  '<p>You run training. Requests come from everywhere, and the work lives in your head. Today you take your team west, to a place where the work runs on rails.</p>'+
+  '<p>You start with <span class="gold">40 hours</span>. Every choice costs or saves time. At each stop you fill in one simple template with your own real work. You leave with all five.</p>'+
+  '<div class="choices">'+choiceBtn(1,"I am in the room with Sandie","m_room")+choiceBtn(2,"I am playing on my own","m_solo")+'</div><button type="button" class="ghost" data-go="40">How to play</button>';},
+1:function(){return '<div class="where">Before you go</div><h2>Name your wagon</h2>'+field("Wagon name","name","Your name or your table's team name. Have fun with it.")+
+  field("Playing for your table?","table","Pick your table number to get on the leaderboard. One phone per table keeps score.","select",[""].concat(Array.apply(null,{length:20}).map(function(_,i){return String(i+1);})))+
+  '<div class="row"><p class="muted" style="margin:10px 0 0">Who is on this trail with you? First names. They will show up along the way. Be kind.</p>'+
+  field("Someone who sends you requests","cast.ask")+field("An expert you count on for reviews","cast.sme")+field("A teammate","cast.mate")+'</div>'+
+  '<label>How big is your team?</label><div class="choices">'+choiceBtn(1,"Just me","p_solo")+choiceBtn(2,"2 to 5 people","p_small")+choiceBtn(3,"6 or more","p_big")+'</div>';},
+2:function(){var qs=["Requests reach me through one door, not five.","People know where their project stands without asking me.","I can see all my current work in one place.","My content reviews end when I planned them to end.","After a launch, we write down what we would change."];
+  return '<div class="where">Pack your wagon</div><h2>Be honest. Nobody sees this but you.</h2><p class="muted">1 is never. 5 is always.</p>'+
+  qs.map(function(q,i){return '<div class="row"><label>'+(i+1)+". "+q+'</label><div class="scale" role="group" aria-label="Score for line '+(i+1)+'">'+[1,2,3,4,5].map(function(n){return '<button type="button" data-score="'+i+'_'+n+'" aria-pressed="'+(S.check[i]===n)+'">'+n+'</button>';}).join("")+'</div></div>';}).join("")+
+  '<div id="lowest" class="live" style="display:none"></div>'+goBtn("Leave town",3);},
+
+3:function(){return '<div class="where">Stop 1 of 5. Leave town.</div><h2>A hallway ambush</h2><p>You are loading the wagon when '+cast("ask")+' catches you. "Hey, quick thing. Can you just build a short course on communication? ASAP."</p><p>What do you do?</p><div class="choices">'+
+  choiceBtn(1,'"Sure, I will get started."',"s1_yes")+choiceBtn(2,'"Email me the details."',"s1_email")+choiceBtn(3,'Ask one thing: "What goes wrong if people do not learn this?"',"s1_ask")+'</div>';},
+4:function(){var p=S.pick.s1;
+  if(p==="s1_yes")return '<h2>You said yes</h2><p>Three weeks later you show the draft. "Oh. That is not what I meant."</p>'+feedback(10,"You built the answer before you knew the problem. Nobody wrote anything down.","One short form with one hard question: what goes wrong if people do not learn this?",5);
+  if(p==="s1_email")return '<h2>The email never comes</h2><p>You chase twice. Then it shows up as a chat message at 6 pm, with no date and no reason.</p>'+feedback(5,"Work comes in through five doors, so it lives nowhere.","One door. One short form. Every request.",5);
+  return '<h2>A long pause</h2><p>"Well... two reps botched a handoff and we lost an account." Now you know the real problem. It may not even be a course.</p>'+feedback(1,"You almost took the request as given. One question saved you weeks.","Put that question on a form so it gets asked every time, not just when you remember.",5);},
+5:function(){return '<div class="where">Template 1 of 5</div><h2>Your request form</h2>'+quick("question 3: what goes wrong if people do not learn this")+'<p class="muted">Pick one real request sitting in your inbox right now.</p>'+
+  field("1. Who is asking?","t1.who")+field("2. What did they ask for?","t1.what")+
+  field("3. What goes wrong if people do not learn this?","t1.problem","If they cannot answer, the request is not ready.","area")+
+  field("4. What does success look like?","t1.success","This becomes how you measure it.","area")+
+  field("5. When is it needed, and what is driving that date?","t1.when",'"ASAP" is not a date.')+
+  '<div id="liveT1" class="live"></div>'+stampBtn(0,6);},
+
+6:function(){return '<div class="where">Stop 2 of 5. The fort.</div><h2>Your VP is at the gate</h2><p>"How is my project going?"</p><p>You have <span class="red">10 seconds</span>. Think of one real project and type your answer.</p>'+
+  '<div class="timer" id="clock">10</div><label for="fortIn">Your answer</label><textarea id="fortIn" data-k="fort" placeholder="Go."></textarea>'+
+  '<button type="button" class="ghost" data-go="7">I am done</button>';},
+7:function(){var n=(S.fort||"").trim().length;
+  return '<h2>Time.</h2><p>'+(n<25?'You got out: "'+esc(S.fort||"Um...")+'" She nods slowly. That is not a good nod.':'You got something out. It was fast, and it was from memory. She has no way to check it.')+'</p>'+
+  feedback(3,"Nobody can do this well. The status lives in your head, so every update is a scramble.","Same five lines, same day, every week. People stop asking because they already know.",8);},
+8:function(){return '<div class="where">Template 2 of 5</div><h2>Your status update</h2>'+quick("the project and what got done this week")+'<p class="muted">Fill in one real project. The email writes itself below.</p>'+
+  field("Project","t2.project")+field("Sponsor first name","t2.sponsor")+field("Status","t2.status",null,"select",["On track","At risk","Stuck","Done"])+
+  field("Done this week","t2.done",null,"area")+field("Coming next week","t2.next",null,"area")+
+  field("What I need from you","t2.ask","One ask. This line is why the update gets read.")+field("By when","t2.by")+field("Your name","t2.me")+
+  '<div id="askT2" class="live"></div><div class="live"><pre id="liveT2"></pre></div>'+stampBtn(1,21);},
+
+9:function(){return '<div class="where">Stop 3 of 5. Wagon check.</div><h2>Something fell off</h2><p>Three miles back, a request slid off the wagon. Nobody noticed. The person who asked for it will notice soon.</p><p>What do you do?</p><div class="choices">'+
+  choiceBtn(1,"Keep rolling. Maybe they forgot too.","s3_roll")+choiceBtn(2,"Stop and dig through every inbox and chat.","s3_dig")+'</div>';},
+10:function(){var p=S.pick.s3;
+  if(p==="s3_roll")return '<h2>They did not forget</h2><p>They bring it up in a meeting. In front of your boss.</p>'+feedback(8,"Your work lives in inboxes, sticky notes, and memory. You find out what is late when someone complains.","One list. One row per request. Anyone can see what is moving and who owns it.",11);
+  return '<h2>You found it</h2><p>It took all afternoon. It was in a chat thread from three weeks ago.</p>'+feedback(4,"You had to search because there is no single place to look.","One list. One row per request. Anyone can see what is moving and who owns it.",11);},
+11:function(){return '<div class="where">Template 3 of 5</div><h2>Your project tracker</h2>'+quick("one real request in the first row")+'<p class="muted">List the real work on your plate. One is enough. Three is better.</p>'+
+  [0,1,2].map(function(i){return '<div class="row">'+field("Request "+(i+1),"t3."+i+".req")+field("Owner","t3."+i+".owner")+field("Status","t3."+i+".status",null,"select",["Not started","In progress","In review","Done","Stuck"])+field("Business outcome","t3."+i+".outcome",i===0?"This comes from question 4 on your request form.":null)+'</div>';}).join("")+
+  '<div id="liveT3" class="live"></div>'+stampBtn(2,12);},
+
+12:function(){return trailEvent(12)+'<div class="where">Stop 4 of 5. The river.</div><h2>Your draft is ready</h2><p>Six people want a say before it ships. '+cast("sme")+' is one of them. The launch date is close. The water looks calm.</p><p>How will you cross?</p><div class="choices">'+
+  choiceBtn(1,"Ford the river. Email it to all six and hope.","s4_ford")+choiceBtn(2,"Take the ferry. Spend a little time on a review plan first.","s4_ferry")+'</div>';},
+13:function(){if(S.pick.s4==="s4_ford")return '<svg class="tomb" viewBox="0 0 60 56" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="14" y="10" width="32" height="38" fill="var(--muted)"/><rect x="18" y="6" width="24" height="4" fill="var(--muted)"/><rect x="22" y="2" width="16" height="4" fill="var(--muted)"/><rect x="28" y="14" width="4" height="14" fill="var(--panel)"/><rect x="23" y="18" width="14" height="4" fill="var(--panel)"/><rect x="6" y="48" width="48" height="6" fill="var(--hill)"/></svg>'+
+  '<h2 style="text-align:center">You have died of review round seven.</h2><p style="text-align:center" class="muted" id="ripLine"></p>'+field("Write your epitaph","epitaph","One line for the tombstone. Famous last words work well.")+'<div style="height:14px"></div>'+
+  '<p>Six reviewers. Six email threads. '+cast("sme")+' and Legal disagreed with each other. Round four. Round seven. The launch moved twice.</p>'+
+  feedback(20,"Everyone reviewed everything, in six places, with no last round.","One job per reviewer. One place for feedback. Two rounds, then it ships.",14,"Pull the wagon out");
+  return '<h2>Dry on the other side</h2><p>Each reviewer had one job. Feedback went in one doc. Round two was the last round, and everyone knew it.</p>'+feedback(2,"You paid a little time up front. That is all.","Write the plan down so you do it this way every time.",14);},
+14:function(){return '<div class="where">Template 4 of 5</div><h2>Your review plan</h2>'+quick("what is being reviewed and one reviewer with one job")+'<p class="muted">Plan the review for one real course or asset.</p>'+
+  field("What is being reviewed?","t4.what")+
+  [0,1,2].map(function(i){return '<div class="row">'+field("Reviewer "+(i+1),"t4.rev."+i+".n")+field("Reviewing for (one job)","t4.rev."+i+".j",null,"select",["","Accuracy","Legal or compliance","Brand","Learner experience","Final approval"])+'</div>';}).join("")+
+  field("All feedback goes in ONE place","t4.place","A shared doc. Not six email threads.")+field("Round 1 due","t4.r1")+field("Round 2 due. This is the last round.","t4.r2")+field("ONE final approver","t4.approver")+
+  '<div id="liveT4" class="live"></div><p class="red" style="margin-top:12px">The rule: feedback after round 2 goes into the next version, not this one.</p>'+stampBtn(3,15);},
+
+15:function(){return trailEvent(15)+'<div class="where">One more river</div><h2>A smaller crossing</h2><p>Two weeks later. A one page job aid is ready. Only four people want to look at it. "It is just a job aid."</p><p>How will you cross?</p><div class="choices">'+
+  choiceBtn(1,"Ford it. It is tiny.","s5_ford")+choiceBtn(2,"Ferry. Two minutes on the review plan.","s5_ferry")+'</div>';},
+16:function(){var first=S.pick.s4==="s4_ford";
+  if(S.pick.s5==="s5_ford")return '<h2>The water was deeper than it looked</h2><p>Four people, four opinions on one page. It took nine days.</p>'+feedback(10,"Small work drowns the same way big work does.","The plan takes two minutes. Use it every time.",17,"Roll on to Oregon");
+  return '<h2>Across in a day</h2><p>'+(first?"Last time you forded and lost the wagon. This time you did not. That is the whole point of today.":"Twice in a row. It is a habit now.")+'</p>'+feedback(1,"Nothing went wrong. That is what a plan feels like.","Keep doing it.",17,"Roll on to Oregon");},
+
+17:function(){return trailEvent(17)+'<div class="where">Stop 5 of 5. Oregon.</div><h2>You made it</h2><p>The valley is green. The team is tired. Everyone wants to run to the next thing.</p><p>Before you unpack, one question: <span class="gold">would you take the same trail again?</span></p>'+
+  '<div class="box"><p><span class="tag red">What usually happens.</span> The project ships, nobody looks back, and the same problem shows up again in three months.</p><p><span class="tag sage">The fix.</span> Four questions. Ten minutes. Within a week of launch. One change goes back into a template.</p></div>'+goBtn("Answer the four questions",18);},
+18:function(){return '<div class="where">Template 5 of 5</div><h2>Your lessons learned</h2>'+quick("question 4, your one change")+'<p class="muted">Think of the last thing you launched.</p>'+
+  field("Project","t5.project")+field("1. What did we plan, and what really happened?","t5.plan","Dates, hours, review rounds. Numbers if you have them.","area")+
+  field("2. What slowed us down?","t5.slow",null,"area")+field("3. What would we do again?","t5.again",null,"area")+
+  field("4. ONE change for next time","t5.change","One. Not five.","area")+field("Who owns that change?","t5.owner")+
+  field("Which template does it change?","t5.tpl",null,"select",["","Request form","Status update","Project tracker","Review plan","None"])+stampBtn(4,19);},
+
+19:function(){var st=S.stamps.reduce(function(a,b){return a+b;},0),h=S.hours,rank=h>=24?"Trail Boss":h>=10?"Seasoned Scout":h>=0?"Greenhorn with a plan":"Over capacity, but you made it";
+  var low=lowest();
+  return '<div class="where">The end of the trail</div><h1>'+rank+'</h1><p style="margin-top:10px">You arrived with <span class="'+(h<0?"red":"gold")+'">'+h+' hours</span> and <span class="gold">'+st+' of 5</span> stamps.</p>'+
+  (h<0?'<p class="muted">Below zero means your team is over capacity. That is most teams. Now you can show it.</p>':'')+
+  (S.table?field("Crew bonus: how many people at your table filled in at least 3 templates?","crew","Count yourself. 50 points each. Nobody gets left on the trail.","select",["0","1","2","3","4","5","6","7","8","9","10","11","12"]):'')+
+  scoreCard()+(S.table?'<p class="muted">Hold this screen up when Sandie calls for scores.</p>':'')+
+  '<div class="box"><p><span class="tag sage">Your first move.</span> '+(low>=0?'Your lowest score was line '+(low+1)+'. Start with your <span class="gold">'+TPL[low].toLowerCase()+'</span>.':'Pick the one template that would help most this week.')+'</p><p>One template, not five. Use it yourself for two weeks. Call it a draft. People help fix a draft. They push back on a rollout.</p></div>'+
+  field("On Monday, I will:","monday",null,"area")+goBtn("See my starter kit",20);},
+20:function(){return '<div class="where">Take it with you</div><h2>Your starter kit</h2><p class="muted">Everything you wrote today. Copy it and paste it into an email to yourself.</p>'+
+  '<div class="kit"><pre id="kitOut">'+esc(kitText())+'</pre></div><button type="button" class="go" id="copyKit">Copy my kit</button><div id="copyMsg" class="live" style="display:none"></div>'+
+  '<button type="button" class="ghost" data-go="19">Back</button>';}
+,
+30:function(){var i=GATES[S.gateNext],names=["Leave town","The fort","Wagon check","The river","The last stretch to Oregon"];
+  return '<svg class="lock" viewBox="0 0 28 30" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="8" y="2" width="12" height="3" fill="var(--ink)"/><rect x="5" y="5" width="4" height="9" fill="var(--ink)"/><rect x="19" y="5" width="4" height="9" fill="var(--ink)"/><rect x="2" y="14" width="24" height="16" fill="var(--gold)"/><rect x="12" y="19" width="4" height="7" fill="var(--bg)"/></svg>'+
+  '<div class="where" style="text-align:center">Gate '+(i+1)+' of 5</div><h2 style="text-align:center">'+names[i]+' is locked</h2>'+
+  '<p style="text-align:center">The whole wagon train moves together. Sandie will put the <span class="gold">trail word</span> on the big screen.</p>'+
+  '<label for="gateIn">Trail word</label><input type="text" id="gateIn" autocomplete="off" autocapitalize="characters" spellcheck="false"><div id="gateMsg" class="live no" style="display:none"></div>'+
+  '<button type="button" class="go" id="gateGo">Open the gate</button>'+
+  '<div class="box"><p><span class="tag sage">While you wait.</span> Look around your table. Is anyone still writing? Go help. Every tablemate who fills in 3 templates is worth 50 points to your wagon.</p></div>';},
+40:function(){return '<div class="where">How to play</div><h2>Five stops. Five templates. One wagon.</h2><div class="how"><ol>'+
+  '<li><span class="gold">Name your wagon</span> and the three people riding with you. They will show up on the trail.</li>'+
+  '<li><span class="gold">You start with 40 hours.</span> Every choice costs or saves time. Go with your gut. There is no trick.</li>'+
+  '<li><span class="gold">At each stop, something goes wrong.</span> The game tells you why, and what fixes it.</li>'+
+  '<li><span class="gold">Then you build the fix.</span> Fill in one short template with your own real work. That earns a stamp. In the room, every stop is a quick fill: one line now, the rest later.</li>'+
+  '<li><span class="gold">In the room, the gates are locked.</span> Sandie shows a trail word. Type it in and everyone rolls on together.</li>'+
+  '<li><span class="gold">You cannot lose.</span> Below zero hours just means your team is over capacity. Keep rolling.</li>'+
+  '<li><span class="gold">At Oregon you get your points</span> and a copy of all five templates to take home.</li></ol>'+
+  '<p class="muted">Points: 10 per hour left. 100 per stamp. Up to 150 at the second river. 50 for every tablemate who fills in 3 templates.</p>'+
+  '<p class="muted">Your work saves on this phone as you type. If you lock the screen or refresh, nothing is lost.</p></div>'+goBtn("Got it",0);},
+21:function(){return trailEvent(21)+'<div class="where">Between the fort and the next stop</div><h2>The inbox hunt</h2><p>Your team is hungry for work. Requests are about to run across the screen.</p><p><span class="gold">Tap a request to say yes.</span> You have 15 seconds. Say yes to as many as you like.</p>'+goBtn("Start the hunt",22)+'<button type="button" class="ghost" data-go="9">Skip the hunt</button>';},
+22:function(){return '<div class="where">The inbox hunt</div><div class="timer" id="huntClock">15</div><div class="arena" id="arena" aria-label="Requests. Tap one to say yes."></div><p class="muted" style="margin-top:8px">Tap to say yes.</p>';},
+23:function(){var h=S.hunt||{yes:0},n=h.yes||0,c=carry(),cost=0,head,body;
+  if(n>c){cost=Math.min(10,n-c);head="You said yes to "+n+" requests.";body="Your team can carry "+c+". The other "+(n-c)+" sit on the wagon and go bad. "+cast("ask")+" is already asking where theirs is.";}
+  else if(n===0){cost=2;head="You said no to everything.";body="Bold. Also, nobody is happy. Saying no with no reason costs you too.";}
+  else{cost=-2;head="You said yes to "+n+".";body="Your team can carry "+c+". You left room to breathe. "+cast("mate")+" thanks you.";}
+  if(!h.done){S.hunt={yes:n,done:true};S.hours-=cost;save();}
+  return '<h2>'+head+'</h2><p>'+body+'</p><p class="cost '+(cost>0?"red":"sage")+'">'+(cost>0?"You lost "+cost+" hours.":"You gained 2 hours.")+'</p>'+
+  '<div class="box"><p><span class="tag red">Why it happened.</span> Saying yes takes one second. Carrying the work takes weeks. Nothing on that screen told you how full the wagon was.</p><p><span class="tag sage">The fix.</span> One list that shows every request and who is carrying it. That is the next stop.</p></div>'+goBtn("Roll on",9);},
+99:function(){var rows="";for(var i=1;i<=B.n;i++){var r=B.rows[i]||{};rows+='<div class="entry"><span>T'+i+'</span><input type="text" data-b="'+i+'_name" value="'+esc(r.name||"")+'" placeholder="Wagon name" aria-label="Table '+i+' wagon name"><input type="text" inputmode="numeric" data-b="'+i+'_pts" value="'+esc(r.pts==null?"":r.pts)+'" placeholder="Points" aria-label="Table '+i+' points"></div>';}
+  return '<div class="where">Trail boss only</div><h1>Leaderboard</h1><div id="board" style="margin-top:10px"></div>'+
+  '<div class="choices" style="margin-top:14px"><button type="button" class="choice" id="bTop"></button><button type="button" class="choice" id="bHide"></button></div>'+
+  '<div id="bEntry"><h2 style="margin-top:18px">Enter scores</h2><p class="muted">Type each table\'s points as they hold up their screens. The board ranks itself. Scores stay on this device.</p>'+rows+
+  '<button type="button" class="ghost" id="bClear">Clear all scores</button></div><button type="button" class="ghost" id="bBack">Back to the game</button>';}
+};
+function board(){var el=$("board");if(!el)return;var list=[];for(var i=1;i<=B.n;i++){var r=B.rows[i];if(r&&r.pts!==""&&r.pts!=null&&!isNaN(+r.pts))list.push({t:i,name:r.name||"",pts:+r.pts});}
+  list.sort(function(a,b){return b.pts-a.pts||a.t-b.t;});var max=list.length?Math.max(1,list[0].pts):1,shown=B.top?list.slice(0,3):list,pos=0,last=null;
+  el.innerHTML=(list.length?'<h2 class="gold" style="text-align:center;margin-bottom:10px">Winner: '+(list[0].name?esc(list[0].name):'Table '+list[0].t)+'</h2>':'')+(list.length?shown.map(function(r,i){if(r.pts!==last){pos=i+1;last=r.pts;}
+    return '<div class="rank'+(pos<=3?" top":"")+'"><span class="pos">'+pos+'</span><span>'+(r.name?esc(r.name)+' <span class="muted">(Table '+r.t+')</span>':'Table '+r.t)+'<div class="bar" style="width:'+Math.max(4,Math.round(r.pts/max*100))+'%"></div></span><span class="pts">'+r.pts+'</span></div>';}).join("")+
+    (B.top&&list.length>3?'<p class="muted" style="margin-top:8px">'+(list.length-3)+' more wagons made it to Oregon.</p>':''):'<p class="muted">No scores yet.</p>');
+  var bt=$("bTop"),bh=$("bHide"),be=$("bEntry");if(bt)bt.innerHTML="<b>1.</b>"+(B.top?"Show every table":"Show the top 3 only");
+  if(bh)bh.innerHTML="<b>2.</b>"+(B.hide?"Show the score entry":"Hide the score entry for the big screen");if(be)be.style.display=B.hide?"none":"block";
+  document.body.classList.toggle("present",!!B.hide&&S.step===99);}
+function stampBtn(i,next){return '<button type="button" class="go" data-stamp="'+i+'_'+next+'">Stamp it and move on</button><button type="button" class="ghost" data-go="'+next+'">Skip the writing for now</button>';}
+function lowest(){var c=S.check;if(c.some(function(v){return !v;}))return -1;var m=Math.min.apply(null,c);return c.indexOf(m);}
+function earned(i){
+  if(i===0)return S.t1.problem.trim().length>0;
+  if(i===1)return S.t2.project.trim()&&(S.t2.done.trim()||S.t2.next.trim());
+  if(i===2)return S.t3.some(function(r){return r.req.trim();});
+  if(i===3)return S.t4.what.trim()&&S.t4.rev.some(function(r){return r.n.trim()&&r.j;});
+  return S.t5.change.trim().length>0;}
+function showLowest(){var el=$("lowest");if(!el)return;var l=lowest();if(l<0){el.style.display="none";return;}
+  el.style.display="block";el.className="live ok";el.textContent="Lowest score: line "+(l+1)+". Your first template is the "+TPL[l].toLowerCase()+". You will fill in all five today. This is the one to use first.";}
+
+function render(){
+  panel.innerHTML=(screens[S.step]||screens[0])();
+  hud();liveAll();showLowest();board();document.body.classList.toggle("present",S.step===99&&!!B.hide);
+  if(S.step===6){var left=10,c=$("clock"),inp=$("fortIn");S.fort="";inp.value="";try{inp.focus();}catch(e){}
+    timer=setInterval(function(){left--;if(c)c.textContent=left;if(left<=0){clearInterval(timer);timer=null;go(7);}},1000);}
+  if(S.step===22)startHunt();
+  var h=panel.querySelector("h1,h2");if(h){h.setAttribute("tabindex","-1");}
+}
+
+/* ---------- events ---------- */
+panel.addEventListener("click",function(e){
+  var b=e.target.closest("button");if(!b)return;
+  if(b.dataset.chip){if(b.classList.contains("got"))return;b.classList.add("got");b.textContent="Yes!";S.hunt=S.hunt||{yes:0};S.hunt.yes++;setTimeout(function(){if(b.parentNode)b.parentNode.removeChild(b);},350);return;}
+  if(b.dataset.go){go(+b.dataset.go);return;}
+  if(b.dataset.score){var p=b.dataset.score.split("_");S.check[+p[0]]=+p[1];save();
+    b.parentNode.querySelectorAll("button").forEach(function(x){x.setAttribute("aria-pressed",x===b);});showLowest();return;}
+  if(b.dataset.stamp){var q=b.dataset.stamp.split("_"),i=+q[0];
+    if(!earned(i)){var m=panel.querySelector("#needMore");if(!m){m=document.createElement("div");m.id="needMore";m.className="live no";b.parentNode.insertBefore(m,b);}
+      m.textContent=["Answer question 3 to earn the stamp. It is the one that matters.","Add a project and one line of progress to earn the stamp.","Add at least one real request to earn the stamp.","Name what is being reviewed, and give one reviewer a job, to earn the stamp.","Write your one change to earn the stamp."][i];return;}
+    S.stamps[i]=1;go(+q[1]);return;}
+  if(b.dataset.pick){var k=b.dataset.pick;
+    if(k.indexOf("m_")===0){S.mode=k==="m_room"?"room":"solo";go(1);return;}
+    if(k.indexOf("p_")===0){S.party=k;var n=$("f_name"),tb=$("f_table");if(n)S.name=n.value;if(tb)S.table=tb.value;go(2);return;}
+    if(k.indexOf("s1_")===0){S.pick.s1=k;spend(k==="s1_yes"?10:k==="s1_email"?5:1);go(4);return;}
+    if(k.indexOf("s3_")===0){S.pick.s3=k;spend(k==="s3_roll"?8:4);go(10);return;}
+    if(k.indexOf("s4_")===0){S.pick.s4=k;spend(k==="s4_ford"?20:2);go(13);return;}
+    if(k.indexOf("s5_")===0){S.pick.s5=k;spend(k==="s5_ford"?10:1);go(16);return;}
+  }
+  if(b.id==="bBack"){go(S.prev||0);return;}
+  if(b.id==="bTop"){B.top=!B.top;saveB();board();return;}
+  if(b.id==="bHide"){B.hide=!B.hide;saveB();board();return;}
+  if(b.id==="bClear"){if(window.confirm("Clear every score on the board?")){B.rows={};saveB();render();}return;}
+  if(b.id==="gateGo"){var v=norm(($("gateIn")||{}).value),i=GATES[S.gateNext],ok=false;try{ok=(v===atob(GW[i])||v===atob(GM));}catch(e1){}
+    if(ok){S.open[i]=1;go(S.gateNext);}else{var gm=$("gateMsg");gm.style.display="block";gm.textContent=v?"That is not the word. Check the big screen, or ask a neighbor.":"Type the trail word from the big screen.";}return;}
+  if(b.id==="copyKit"){var txt=kitText(),msg=$("copyMsg");msg.style.display="block";
+    var done=function(){msg.className="live ok";msg.textContent="Copied. Paste it into an email to yourself.";},
+        fail=function(){msg.className="live no";msg.textContent="Your browser blocked the copy. Press and hold the text above, choose Select all, then Copy. Or take a screenshot.";};
+    try{if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(done,function(){legacy();});}else legacy();}catch(err){legacy();}
+    function legacy(){try{var ta=document.createElement("textarea");ta.value=txt;ta.style.position="fixed";ta.style.opacity="0";document.body.appendChild(ta);ta.select();var ok=document.execCommand("copy");document.body.removeChild(ta);ok?done():fail();}catch(e2){fail();}}
+  }
+});
+panel.addEventListener("input",function(e){var bk=e.target.dataset&&e.target.dataset.b;if(bk){var q=bk.split("_"),i=q[0];B.rows[i]=B.rows[i]||{};B.rows[i][q[1]]=q[1]==="pts"?e.target.value.replace(/[^0-9]/g,""):e.target.value;saveB();board();return;}
+  var k=e.target.dataset&&e.target.dataset.k;if(!k)return;set(k,e.target.value);save();liveAll();});
+panel.addEventListener("change",function(e){var k=e.target.dataset&&e.target.dataset.k;if(!k)return;set(k,e.target.value);save();liveAll();
+  if(k==="crew"){var p=points();var a=$("ptsBig"),c=$("crewN"),d=$("crewPts");if(a)a.textContent=p.total;if(c)c.textContent=+S.crew||0;if(d)d.textContent=p.crew;}});
+document.addEventListener("keydown",function(e){if(e.key==="Enter"&&e.target.id==="gateIn"){var g=$("gateGo");if(g)g.click();return;}
+  if(/INPUT|TEXTAREA|SELECT/.test(e.target.tagName))return;var n=+e.key;if(n>=1&&n<=3){var c=panel.querySelectorAll(".choice");if(c[n-1])c[n-1].click();}});
+$("bossLink").addEventListener("click",function(){if(S.step!==99){S.prev=S.step;}go(99);});
+$("restart").addEventListener("click",function(){if(S.step>1&&!window.confirm("Start over? This clears everything you wrote."))return;if(timer){clearInterval(timer);timer=null;}S=fresh();save();render();});
+
+/* the fort screen charges its 3 hours once, on arrival at the feedback */
+var _go=go;go=function(n){if(n===7&&S.step===6&&!S.pick.s2){S.pick.s2=1;spend(3);}_go(n);};
+if(S.step===6)S.step=6; /* a refresh mid-timer simply restarts the 10 seconds */
+render();
+})();
+</script>
+</body>
+</html>
