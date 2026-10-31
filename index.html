@@ -152,6 +152,17 @@ body.present .rank .pts,body.present .rank .pos{font-size:3.2rem}
 .hu-l{font-family:"Pixelify Sans",sans-serif;font-weight:700;font-size:min(8vw,6vh);text-transform:uppercase;letter-spacing:.06em}
 .hu-x{margin-top:28px;background:none;border:0;color:var(--muted);text-decoration:underline;text-underline-offset:3px;font-size:1rem;min-height:44px}
 .late{text-align:center;margin:10px 0 0;font-size:1rem}
+/* Arrival in Oregon: fireworks, banner, rank drop-in. Plays once per trip. */
+#fw .burst{opacity:0}
+.scene.fire #fw .burst{animation:burst 1.1s steps(5) 2}
+.scene.fire #fw .b0{animation-delay:1.3s}.scene.fire #fw .b1{animation-delay:1.6s}.scene.fire #fw .b2{animation-delay:1.9s}.scene.fire #fw .b3{animation-delay:2.2s}
+@keyframes burst{0%{opacity:1;transform:scale(.2)}70%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(1.2)}}
+.arrive-msg{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);text-align:center;font-family:"Pixelify Sans",sans-serif;font-weight:700;font-size:min(7vw,2.4rem);text-transform:uppercase;letter-spacing:.06em;color:var(--gold);text-shadow:3px 3px 0 var(--purple),-2px -2px 0 #000;opacity:0;pointer-events:none;z-index:1}
+.scene.fire .arrive-msg{animation:banner 3.6s steps(1) 1.2s}
+@keyframes banner{0%{opacity:1}12%{opacity:0}20%{opacity:1}32%{opacity:0}40%,90%{opacity:1}100%{opacity:0}}
+h1.reveal{animation:drop .9s steps(6) 1.4s both}
+@keyframes drop{0%{opacity:0;transform:translateY(-28px)}100%{opacity:1;transform:none}}
+@media (prefers-reduced-motion: reduce){.scene.fire #fw .burst,.scene.fire .arrive-msg,h1.reveal{animation:none}}
 @media (prefers-reduced-motion: reduce){
   #wagon{transition:none}#wagon.roll .bob,.chip,.twinkle,.stamps i.pop,.hud .hrs.bump,p:has(+ .choices)::after{animation:none}}
 </style>
@@ -189,6 +200,13 @@ body.present .rank .pts,body.present .rank .pos{font-size:3.2rem}
       <rect x="170" y="80" width="3" height="12" fill="#0B0B24"/><rect x="164" y="78" width="15" height="5" fill="#CEFF59"/>
       <!-- Oregon flag -->
       <rect x="298" y="68" width="3" height="24" fill="#EEEDFB"/><polygon points="301,68 316,73 301,78" fill="#CEFF59"/>
+      <!-- fireworks for the arrival in Oregon -->
+      <g id="fw">
+        <g class="burst b0" fill="#CEFF59" style="transform-origin:200px 30px"><rect x="206" y="29" width="3" height="3"/><rect x="204" y="34" width="3" height="3"/><rect x="199" y="36" width="3" height="3"/><rect x="194" y="34" width="3" height="3"/><rect x="192" y="29" width="3" height="3"/><rect x="194" y="24" width="3" height="3"/><rect x="199" y="22" width="3" height="3"/><rect x="204" y="24" width="3" height="3"/><rect x="212" y="29" width="3" height="3"/><rect x="208" y="38" width="3" height="3"/><rect x="199" y="42" width="3" height="3"/><rect x="190" y="38" width="3" height="3"/><rect x="186" y="29" width="3" height="3"/><rect x="190" y="20" width="3" height="3"/><rect x="199" y="16" width="3" height="3"/><rect x="208" y="20" width="3" height="3"/><rect x="199" y="29" width="3" height="3"/></g>
+        <g class="burst b1" fill="#FA1DF8" style="transform-origin:252px 22px"><rect x="258" y="21" width="3" height="3"/><rect x="256" y="26" width="3" height="3"/><rect x="251" y="28" width="3" height="3"/><rect x="246" y="26" width="3" height="3"/><rect x="244" y="21" width="3" height="3"/><rect x="246" y="16" width="3" height="3"/><rect x="251" y="14" width="3" height="3"/><rect x="256" y="16" width="3" height="3"/><rect x="264" y="21" width="3" height="3"/><rect x="260" y="30" width="3" height="3"/><rect x="251" y="34" width="3" height="3"/><rect x="242" y="30" width="3" height="3"/><rect x="238" y="21" width="3" height="3"/><rect x="242" y="12" width="3" height="3"/><rect x="251" y="8" width="3" height="3"/><rect x="260" y="12" width="3" height="3"/><rect x="251" y="21" width="3" height="3"/></g>
+        <g class="burst b2" fill="#EEEDFB" style="transform-origin:150px 36px"><rect x="156" y="35" width="3" height="3"/><rect x="154" y="40" width="3" height="3"/><rect x="149" y="42" width="3" height="3"/><rect x="144" y="40" width="3" height="3"/><rect x="142" y="35" width="3" height="3"/><rect x="144" y="30" width="3" height="3"/><rect x="149" y="28" width="3" height="3"/><rect x="154" y="30" width="3" height="3"/><rect x="162" y="35" width="3" height="3"/><rect x="158" y="44" width="3" height="3"/><rect x="149" y="48" width="3" height="3"/><rect x="140" y="44" width="3" height="3"/><rect x="136" y="35" width="3" height="3"/><rect x="140" y="26" width="3" height="3"/><rect x="149" y="22" width="3" height="3"/><rect x="158" y="26" width="3" height="3"/><rect x="149" y="35" width="3" height="3"/></g>
+        <g class="burst b3" fill="#CEFF59" style="transform-origin:226px 46px"><rect x="232" y="45" width="3" height="3"/><rect x="230" y="50" width="3" height="3"/><rect x="225" y="52" width="3" height="3"/><rect x="220" y="50" width="3" height="3"/><rect x="218" y="45" width="3" height="3"/><rect x="220" y="40" width="3" height="3"/><rect x="225" y="38" width="3" height="3"/><rect x="230" y="40" width="3" height="3"/><rect x="238" y="45" width="3" height="3"/><rect x="234" y="54" width="3" height="3"/><rect x="225" y="58" width="3" height="3"/><rect x="216" y="54" width="3" height="3"/><rect x="212" y="45" width="3" height="3"/><rect x="216" y="36" width="3" height="3"/><rect x="225" y="32" width="3" height="3"/><rect x="234" y="36" width="3" height="3"/><rect x="225" y="45" width="3" height="3"/></g>
+      </g>
       <!-- wagon, same colors as the deck: lavender cover, lime bed, purple wheels -->
       <g id="wagon" transform="translate(6,0)"><g class="bob">
         <rect x="2" y="78" width="20" height="9" fill="#EEEDFB"/><rect x="4" y="76" width="16" height="2" fill="#EEEDFB"/>
@@ -198,6 +216,7 @@ body.present .rank .pts,body.present .rank .pos{font-size:3.2rem}
         <rect x="24" y="88" width="6" height="2" fill="#CEFF59"/>
       </g></g>
     </svg>
+    <div class="arrive-msg">Welcome to Oregon</div>
   </figure>
 
   <main class="panel" id="panel" aria-live="polite"></main>
@@ -492,9 +511,13 @@ function earned(i){
 function showLowest(){var el=$("lowest");if(!el)return;var l=lowest();if(l<0){el.style.display="none";return;}
   el.style.display="block";el.className="live ok";el.textContent="Lowest score: line "+(l+1)+". Your first template is the "+TPL[l].toLowerCase()+". You will fill in all five today. This is the one to use first.";}
 
+function arrive(){var sc=document.querySelector(".scene"),h=panel.querySelector("h1");if(h)h.classList.add("reveal");
+  if(!sc)return;sc.classList.remove("fire");void sc.offsetWidth;sc.classList.add("fire");setTimeout(function(){sfx("fanfare");},1300);
+  setTimeout(function(){sc.classList.remove("fire");},5200);}
 function render(){
   panel.innerHTML=(screens[S.step]||screens[0])();
-  hud();liveAll();showLowest();board();document.body.classList.toggle("present",S.step===99&&!!B.hide);
+  hud();liveAll();showLowest();board();
+  if(S.step===19&&!S.arrived){S.arrived=1;save();arrive();}document.body.classList.toggle("present",S.step===99&&!!B.hide);
   if(S.step===6){var left=10,c=$("clock"),inp=$("fortIn");S.fort="";inp.value="";try{inp.focus();}catch(e){}
     timer=setInterval(function(){left--;if(c)c.textContent=left;if(left<=0){clearInterval(timer);timer=null;go(7);}},1000);}
   if(S.step===22)startHunt();
@@ -505,7 +528,7 @@ function render(){
 var SKEY="learnops-trail-sound",snd=false,AC=null;
 try{snd=localStorage.getItem(SKEY)==="on";}catch(e){}
 function sfx(kind){if(!snd)return;try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();if(AC.state==="suspended")AC.resume();
-  var seq={tap:[[660,.05]],stamp:[[523,.08],[659,.08],[784,.08],[1047,.18]],gate:[[392,.08],[523,.08],[784,.18]],no:[[150,.2]]}[kind]||[[660,.05]];
+  var seq={tap:[[660,.05]],fanfare:[[523,.1],[659,.1],[784,.1],[1047,.22],[784,.1],[1047,.4]],stamp:[[523,.08],[659,.08],[784,.08],[1047,.18]],gate:[[392,.08],[523,.08],[784,.18]],no:[[150,.2]]}[kind]||[[660,.05]];
   var t=AC.currentTime+.01;seq.forEach(function(n){var o=AC.createOscillator(),g=AC.createGain();o.type="square";o.frequency.value=n[0];
     g.gain.setValueAtTime(.05,t);g.gain.exponentialRampToValueAtTime(.001,t+n[1]);o.connect(g);g.connect(AC.destination);o.start(t);o.stop(t+n[1]);t+=n[1];});}catch(e){}}
 function sndLabel(){var b=$("soundBtn");if(b){b.textContent="Sound: "+(snd?"on":"off");b.setAttribute("aria-pressed",String(snd));}}
